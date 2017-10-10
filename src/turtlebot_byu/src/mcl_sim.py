@@ -6,6 +6,7 @@ import sys
 import pdb
 import ekf
 import ukf
+import mcl
 import dynamics
 import stat_filter
 
@@ -115,6 +116,14 @@ if __name__=='__main__':
     theta_plot_est = []
 
     x.append(x0)
+
+    num_particles = 1000
+
+    lb = [-20.0, -20.0, -np.pi]
+    ub = [20.0, 20.0, np.pi]
+
+    chi = stat_filter.generate_particles_uniform_dist(lb, ub, num_particles)
+    print chi
     mu.append(x0)
 
     x_plot.append(x[0][0])
@@ -133,9 +142,6 @@ if __name__=='__main__':
     y_err.append(mu[0][1]-x[0][1])
     theta_err.append(mu[0][2]-x[0][2])
 
-    K_plot = [[],[],[]]
-    t_plot = [[],[],[]]
-    print t_plot
 
     plt.ion()
 
@@ -148,65 +154,46 @@ if __name__=='__main__':
 
         ranges, bearings = simulate_sensor_data(x_next, sigma_r, sigma_phi)
 
-        # mu_next, sigma, K_out =  ekf.ekf_turtlebot(mu[i], sigma, v_c[i], w_c[i], ranges, bearings, landmark_pts, dt, Q, alpha)
-        landmark_idx = i%len(landmark_pts)
-        mu_next, sigma, K_out =  ukf.ukf_turtlebot(mu[i], sigma, v_c[i], w_c[i], ranges[landmark_idx], bearings[landmark_idx], landmark_pts[landmark_idx], dt, Q, alpha)
-
-        mu.append(mu_next)
-
-        K_plot[landmark_idx].append(K_out[0][0])
-
-        t_plot[landmark_idx].append(t[i])
-        # K_plot[1][i] = K_out[1][0]
-        # K_plot[2][i] = K_out[2][0]
-
-        sigma_x.append(2*math.sqrt(sigma[0][0]))
-        sigma_y.append(2*math.sqrt(sigma[1][1]))
-        sigma_theta.append(math.sqrt(2*sigma[2][2]))
-
-        x_plot_est.append(mu[i+1][0][0])
-        y_plot_est.append(mu[i+1][1][0])
-        theta_plot_est.append(mu[i+1][2][0])
-
-        x_err.append(mu[i+1][0][0] - x[i+1][0])
-        y_err.append(mu[i+1][1][0] - x[i+1][1])
-        theta_err.append(mu[i+1][2][0] - x[i+1][2])
-
-        plot_iteration(x_plot, y_plot, x[i+1], x_plot_est, y_plot_est, ranges, bearings)
+        chi = mcl.mcl_turtlebot(chi, v_c[i], w_c[i], ranges, bearings, landmark_pts, dt, alpha, sigma_r, sigma_phi)
 
 
-    fig2 = plt.figure()
-    ax1 = fig2.add_subplot(211)
-    plot_data(ax1, [t, t], [x_plot, x_plot_est], ['Truth', 'Estimate'], "X Position vs Time", "Time (s)", "X Position (m)")
+        # mu.append(mu_next)
 
-    ax2 = fig2.add_subplot(212)
-    plot_data(ax2, [t, t, t], [x_err, sigma_x, -1*np.array(sigma_x)], ['Estimate Error in X', '95% Certainty', '95% Certainty'], "X Position Error vs Time", "Time (s)", "Error (m)")
+        # sigma_x.append(2*math.sqrt(sigma[0][0]))
+        # sigma_y.append(2*math.sqrt(sigma[1][1]))
+        # sigma_theta.append(math.sqrt(2*sigma[2][2]))
 
-    fig3 = plt.figure()
-    ax3 = fig3.add_subplot(211)
-    plot_data(ax3, [t, t], [y_plot, y_plot_est], ['Truth', 'Estimate'], "Y Position vs Time", "Time (s)", "Y Position (m)")
+        # x_plot_est.append(mu[i+1][0][0])
+        # y_plot_est.append(mu[i+1][1][0])
+        # theta_plot_est.append(mu[i+1][2][0])
 
-    ax4 = fig3.add_subplot(212)
-    plot_data(ax4, [t, t, t], [y_err, sigma_y, -1*np.array(sigma_y)], ['Estimate Error in Y', '95% Certainty', '95% Certainty'], "Y Position Error vs Time", "Time (s)", "Error (m)")
+        # x_err.append(mu[i+1][0][0] - x[i+1][0])
+        # y_err.append(mu[i+1][1][0] - x[i+1][1])
+        # theta_err.append(mu[i+1][2][0] - x[i+1][2])
 
-    fig4 = plt.figure()
-    ax5 = fig4.add_subplot(211)
-    plot_data(ax5, [t, t], [theta_plot, theta_plot_est], ['Truth', 'Estimate'], "Heading vs Time", "Time (s)", "Heading (rad)")
+        plot_iteration(x_plot[len(x_plot)-1], y_plot[len(y_plot)], x[i+1], x_plot_est, y_plot_est, ranges, bearings)
 
-    ax6 = fig4.add_subplot(212)
-    plot_data(ax6, [t, t, t], [theta_err, sigma_theta, -1*np.array(sigma_theta)], ['Estimate Error in Heading', '95% Certainty', '95% Certainty'], "Heading Error vs Time", "Time (s)", "Error (rad)")
 
-    fig5 = plt.figure()
-    ax7 = fig5.add_subplot(311)
-    plot_data(ax7, [t_plot[0]], [K_plot[0]], ['Norm of Kalman Gains Landmark 1'], "Norm of Landmark 1 Kalman Gains vs Time", "Time (s)", "Gain")
+    # fig2 = plt.figure()
+    # ax1 = fig2.add_subplot(211)
+    # plot_data(ax1, [t, t], [x_plot, x_plot_est], ['Truth', 'Estimate'], "X Position vs Time", "Time (s)", "X Position (m)")
 
-    if len(landmark_pts)>1:
-        ax8 = fig5.add_subplot(312)
-        plot_data(ax8, [t_plot[1]], [K_plot[1]], ['Norm of Kalman Gains Landmark 2'], "Norm of Landmark 2 Kalman Gains vs Time", "Time (s)", "Gain")
+    # ax2 = fig2.add_subplot(212)
+    # plot_data(ax2, [t, t, t], [x_err, sigma_x, -1*np.array(sigma_x)], ['Estimate Error in X', '95% Certainty', '95% Certainty'], "X Position Error vs Time", "Time (s)", "Error (m)")
 
-    if len(landmark_pts)>2:
-        ax9 = fig5.add_subplot(313)
-        plot_data(ax9, [t_plot[2]], [K_plot[2]], ['Norm of Kalman Gains Landmark 3'], "Norm of Landmark 3 Kalman Gains vs Time", "Time (s)", "Gain")
+    # fig3 = plt.figure()
+    # ax3 = fig3.add_subplot(211)
+    # plot_data(ax3, [t, t], [y_plot, y_plot_est], ['Truth', 'Estimate'], "Y Position vs Time", "Time (s)", "Y Position (m)")
+
+    # ax4 = fig3.add_subplot(212)
+    # plot_data(ax4, [t, t, t], [y_err, sigma_y, -1*np.array(sigma_y)], ['Estimate Error in Y', '95% Certainty', '95% Certainty'], "Y Position Error vs Time", "Time (s)", "Error (m)")
+
+    # fig4 = plt.figure()
+    # ax5 = fig4.add_subplot(211)
+    # plot_data(ax5, [t, t], [theta_plot, theta_plot_est], ['Truth', 'Estimate'], "Heading vs Time", "Time (s)", "Heading (rad)")
+
+    # ax6 = fig4.add_subplot(212)
+    # plot_data(ax6, [t, t, t], [theta_err, sigma_theta, -1*np.array(sigma_theta)], ['Estimate Error in Heading', '95% Certainty', '95% Certainty'], "Heading Error vs Time", "Time (s)", "Error (rad)")
 
     raw_input("Press enter....")
 

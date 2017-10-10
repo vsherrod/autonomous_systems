@@ -2,7 +2,6 @@
 import math
 import numpy as np
 import dynamics
-import pdb
 
 def fill_sigma_aug(sigma_aug, sigma, M, Q):
 

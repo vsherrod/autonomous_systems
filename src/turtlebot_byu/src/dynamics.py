@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import math
 import numpy as np
+import stat_filter
 
 def propogate_next_state(x, v, w, dt):
     delta = np.zeros((3,1))
@@ -12,3 +13,9 @@ def propogate_next_state(x, v, w, dt):
 
 def norm(x):
     return math.sqrt(x[0]*x[0] + x[1]*x[1])
+
+def landmark_measurement_model(f, x, landmark_pt, sigma_r, sigma_phi):
+    r = norm([landmark_pt[0]-x[0],landmark_pt[1]-x[1]])
+    phi = np.arctan2(landmark_pt[1]-x[1],landmark_pt[0]-x[0]) - x[2]
+    q = stat_filter.prob(f[0] - r, sigma_r)*stat_filter.prob(f[1] - phi, sigma_phi)
+    return q
