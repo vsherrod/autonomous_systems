@@ -14,13 +14,20 @@ def low_variance_sampler(chi, weights):
     r = np.random.rand()*(1.0/M)
     c = weights[0]
     i = 0
+    print "max: ", np.amax(weights)
 
-    for m in range(1, M):
-        U = r + (m-1)*1/M
+    for m in range(0, M):
+        U = r + (m)*1/M
         while U > c:
+            # print i
+            # print "m: ", m
+            # print "U: ", U
+            # print "length weights: ", len(weights)
+            # print "length chi: ", len(chi)
             i = i + 1
             c = c + weights[i]
-        chi_bar.append(chi_[i])
+        chi_bar.append(chi[i])
+        # print "length: ", len(chi_bar)
 
     return chi_bar
 
@@ -28,7 +35,7 @@ def uniform_rand(lb,ub):
     return np.random.rand()*(ub - lb) + lb
 
 def generate_particles_uniform_dist(lb, ub, num_particles):
-    particles = np.zeros((num_particles,len(lb)))
+    particles = np.zeros((num_particles,len(lb),1))
 
     for i in range(0,num_particles):
         for j in range(0, len(lb)):

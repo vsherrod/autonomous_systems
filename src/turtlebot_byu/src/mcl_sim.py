@@ -111,9 +111,9 @@ if __name__=='__main__':
     y_plot = []
     theta_plot = []
 
-    x_plot_est = []
-    y_plot_est = []
-    theta_plot_est = []
+    # x_plot_est = []
+    # y_plot_est = []
+    # theta_plot_est = []
 
     x.append(x0)
 
@@ -121,18 +121,26 @@ if __name__=='__main__':
 
     lb = [-20.0, -20.0, -np.pi]
     ub = [20.0, 20.0, np.pi]
+    # lb = [-6.0, -4.0, np.pi/4.0]
+    # ub = [-4.0, -2.0, 3.0*np.pi/4.0]
 
     chi = stat_filter.generate_particles_uniform_dist(lb, ub, num_particles)
-    print chi
+
+    x_plot_est = np.zeros(len(chi))
+    y_plot_est = np.zeros(len(chi))
+    for j in range(0, len(chi)):
+        x_plot_est[j] = chi[j][0]
+        y_plot_est[j] = chi[j][1]
+
     mu.append(x0)
 
     x_plot.append(x[0][0])
     y_plot.append(x[0][1])
     theta_plot.append(x[0][2])
 
-    x_plot_est.append(mu[0][0])
-    y_plot_est.append(mu[0][1])
-    theta_plot_est.append(mu[0][2])
+    # x_plot_est.append(mu[0][0])
+    # y_plot_est.append(mu[0][1])
+    # theta_plot_est.append(mu[0][2])
 
     x_err = []
     y_err = []
@@ -145,7 +153,12 @@ if __name__=='__main__':
 
     plt.ion()
 
+    ranges, bearings = simulate_sensor_data(x[0], sigma_r, sigma_phi)
+    plot_iteration(x_plot[len(x_plot)-1], y_plot[len(y_plot)-1], x[0], x_plot_est, y_plot_est, ranges, bearings)
+
     for i in range(0, len(v_c)-1):
+        pdb.set_trace()
+
         x_next = dynamics.propogate_next_state(x[i], v[i], w[i], dt)
         x.append(x_next)
         x_plot.append(x[i+1][0])
@@ -157,6 +170,9 @@ if __name__=='__main__':
         chi = mcl.mcl_turtlebot(chi, v_c[i], w_c[i], ranges, bearings, landmark_pts, dt, alpha, sigma_r, sigma_phi)
 
 
+        for j in range(0, len(chi)):
+            x_plot_est[j] = chi[j][0]
+            y_plot_est[j] = chi[j][1]
         # mu.append(mu_next)
 
         # sigma_x.append(2*math.sqrt(sigma[0][0]))
@@ -171,7 +187,7 @@ if __name__=='__main__':
         # y_err.append(mu[i+1][1][0] - x[i+1][1])
         # theta_err.append(mu[i+1][2][0] - x[i+1][2])
 
-        plot_iteration(x_plot[len(x_plot)-1], y_plot[len(y_plot)], x[i+1], x_plot_est, y_plot_est, ranges, bearings)
+        plot_iteration(x_plot[len(x_plot)-1], y_plot[len(y_plot)-1], x[i+1], x_plot_est, y_plot_est, ranges, bearings)
 
 
     # fig2 = plt.figure()
