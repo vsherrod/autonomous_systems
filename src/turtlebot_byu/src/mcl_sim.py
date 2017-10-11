@@ -111,36 +111,46 @@ if __name__=='__main__':
     y_plot = []
     theta_plot = []
 
-    # x_plot_est = []
-    # y_plot_est = []
-    # theta_plot_est = []
+    x_plot_est = []
+    y_plot_est = []
+    theta_plot_est = []
 
     x.append(x0)
 
     num_particles = 1000
 
-    lb = [-20.0, -20.0, -np.pi]
-    ub = [20.0, 20.0, np.pi]
+    # lb = [-20.0, -20.0, -np.pi]
+    # ub = [20.0, 20.0, np.pi]
     # lb = [-6.0, -4.0, np.pi/4.0]
     # ub = [-4.0, -2.0, 3.0*np.pi/4.0]
+    lb = [-5.1, -4.9, 499.0*np.pi/1000.0]
+    ub = [-3.1, -2.9, 501.0*np.pi/1000.0]
 
     chi = stat_filter.generate_particles_uniform_dist(lb, ub, num_particles)
 
-    x_plot_est = np.zeros(len(chi))
-    y_plot_est = np.zeros(len(chi))
-    for j in range(0, len(chi)):
-        x_plot_est[j] = chi[j][0]
-        y_plot_est[j] = chi[j][1]
+    x_particles = np.zeros(len(chi))
+    y_particles = np.zeros(len(chi))
+    theta_particles = np.zeros(len(chi))
 
-    mu.append(x0)
+    for j in range(0, len(chi)):
+        x_particles[j] = chi[j][0]
+        y_particles[j] = chi[j][1]
+        theta_particles[j] = chi[j][1]
+
+    mu_next = np.zeros((3,1))
+    mu_next[0] = np.mean(x_particles)
+    mu_next[1] = np.mean(y_particles)
+    mu_next[2] = np.mean(theta_particles)
+
+    mu.append(mu_next)
 
     x_plot.append(x[0][0])
     y_plot.append(x[0][1])
     theta_plot.append(x[0][2])
 
-    # x_plot_est.append(mu[0][0])
-    # y_plot_est.append(mu[0][1])
-    # theta_plot_est.append(mu[0][2])
+    x_plot_est.append(mu[0][0])
+    y_plot_est.append(mu[0][1])
+    theta_plot_est.append(mu[0][2])
 
     x_err = []
     y_err = []
@@ -154,10 +164,10 @@ if __name__=='__main__':
     plt.ion()
 
     ranges, bearings = simulate_sensor_data(x[0], sigma_r, sigma_phi)
-    plot_iteration(x_plot[len(x_plot)-1], y_plot[len(y_plot)-1], x[0], x_plot_est, y_plot_est, ranges, bearings)
+    plot_iteration(x_plot[len(x_plot)-1], y_plot[len(y_plot)-1], x[0], x_particles, y_particles, ranges, bearings)
 
     for i in range(0, len(v_c)-1):
-        pdb.set_trace()
+        # pdb.set_trace()
 
         x_next = dynamics.propogate_next_state(x[i], v[i], w[i], dt)
         x.append(x_next)
@@ -167,49 +177,61 @@ if __name__=='__main__':
 
         ranges, bearings = simulate_sensor_data(x_next, sigma_r, sigma_phi)
 
-        chi = mcl.mcl_turtlebot(chi, v_c[i], w_c[i], ranges, bearings, landmark_pts, dt, alpha, sigma_r, sigma_phi)
+        chi, sigma = mcl.mcl_turtlebot(chi, v_c[i], w_c[i], ranges, bearings, landmark_pts, dt, alpha, sigma_r, sigma_phi, sigma)
 
 
         for j in range(0, len(chi)):
-            x_plot_est[j] = chi[j][0]
-            y_plot_est[j] = chi[j][1]
-        # mu.append(mu_next)
+            x_particles[j] = chi[j][0]
+            y_particles[j] = chi[j][1]
+            theta_particles[j] = chi[j][2]
 
-        # sigma_x.append(2*math.sqrt(sigma[0][0]))
-        # sigma_y.append(2*math.sqrt(sigma[1][1]))
-        # sigma_theta.append(math.sqrt(2*sigma[2][2]))
+        mu_next = np.zeros((3,1))
+        mu_next[0] = np.mean(x_particles)
+        mu_next[1] = np.mean(y_particles)
+        mu_next[2] = np.mean(theta_particles)
+        # sigma[0][0] = np.std(x_particles)**2
+        # sigma[1][1] = np.std(y_particles)**2
+        # sigma[2][2] = np.std(theta_particles)**2
 
-        # x_plot_est.append(mu[i+1][0][0])
-        # y_plot_est.append(mu[i+1][1][0])
-        # theta_plot_est.append(mu[i+1][2][0])
+        mu.append(mu_next)
 
-        # x_err.append(mu[i+1][0][0] - x[i+1][0])
-        # y_err.append(mu[i+1][1][0] - x[i+1][1])
-        # theta_err.append(mu[i+1][2][0] - x[i+1][2])
+        # print"mu: ", mu
 
-        plot_iteration(x_plot[len(x_plot)-1], y_plot[len(y_plot)-1], x[i+1], x_plot_est, y_plot_est, ranges, bearings)
+        sigma_x.append(2*math.sqrt(sigma[0][0]))
+        sigma_y.append(2*math.sqrt(sigma[1][1]))
+        sigma_theta.append(math.sqrt(2*sigma[2][2]))
+
+        x_plot_est.append(mu[i+1][0][0])
+        y_plot_est.append(mu[i+1][1][0])
+        theta_plot_est.append(mu[i+1][2][0])
+
+        x_err.append(mu[i+1][0][0] - x[i+1][0])
+        y_err.append(mu[i+1][1][0] - x[i+1][1])
+        theta_err.append(mu[i+1][2][0] - x[i+1][2])
+
+        plot_iteration(x_plot[len(x_plot)-1], y_plot[len(y_plot)-1], x[i+1], x_particles, y_particles, ranges, bearings)
 
 
-    # fig2 = plt.figure()
-    # ax1 = fig2.add_subplot(211)
-    # plot_data(ax1, [t, t], [x_plot, x_plot_est], ['Truth', 'Estimate'], "X Position vs Time", "Time (s)", "X Position (m)")
+    fig2 = plt.figure()
+    ax1 = fig2.add_subplot(211)
+    plot_data(ax1, [t, t], [x_plot, x_plot_est], ['Truth', 'Estimate'], "X Position vs Time", "Time (s)", "X Position (m)")
 
-    # ax2 = fig2.add_subplot(212)
-    # plot_data(ax2, [t, t, t], [x_err, sigma_x, -1*np.array(sigma_x)], ['Estimate Error in X', '95% Certainty', '95% Certainty'], "X Position Error vs Time", "Time (s)", "Error (m)")
+    ax2 = fig2.add_subplot(212)
+    plot_data(ax2, [t, t, t], [x_err, sigma_x, -1*np.array(sigma_x)], ['Estimate Error in X', '95% Certainty', '95% Certainty'], "X Position Error vs Time", "Time (s)", "Error (m)")
 
-    # fig3 = plt.figure()
-    # ax3 = fig3.add_subplot(211)
-    # plot_data(ax3, [t, t], [y_plot, y_plot_est], ['Truth', 'Estimate'], "Y Position vs Time", "Time (s)", "Y Position (m)")
+    fig3 = plt.figure()
+    ax3 = fig3.add_subplot(211)
+    plot_data(ax3, [t, t], [y_plot, y_plot_est], ['Truth', 'Estimate'], "Y Position vs Time", "Time (s)", "Y Position (m)")
 
-    # ax4 = fig3.add_subplot(212)
-    # plot_data(ax4, [t, t, t], [y_err, sigma_y, -1*np.array(sigma_y)], ['Estimate Error in Y', '95% Certainty', '95% Certainty'], "Y Position Error vs Time", "Time (s)", "Error (m)")
+    ax4 = fig3.add_subplot(212)
+    plot_data(ax4, [t, t, t], [y_err, sigma_y, -1*np.array(sigma_y)], ['Estimate Error in Y', '95% Certainty', '95% Certainty'], "Y Position Error vs Time", "Time (s)", "Error (m)")
 
-    # fig4 = plt.figure()
-    # ax5 = fig4.add_subplot(211)
-    # plot_data(ax5, [t, t], [theta_plot, theta_plot_est], ['Truth', 'Estimate'], "Heading vs Time", "Time (s)", "Heading (rad)")
+    fig4 = plt.figure()
+    ax5 = fig4.add_subplot(211)
+    plot_data(ax5, [t, t], [theta_plot, theta_plot_est], ['Truth', 'Estimate'], "Heading vs Time", "Time (s)", "Heading (rad)")
 
-    # ax6 = fig4.add_subplot(212)
-    # plot_data(ax6, [t, t, t], [theta_err, sigma_theta, -1*np.array(sigma_theta)], ['Estimate Error in Heading', '95% Certainty', '95% Certainty'], "Heading Error vs Time", "Time (s)", "Error (rad)")
+    ax6 = fig4.add_subplot(212)
+    plot_data(ax6, [t, t, t], [theta_err, sigma_theta, -1*np.array(sigma_theta)], ['Estimate Error in Heading', '95% Certainty', '95% Certainty'], "Heading Error vs Time", "Time (s)", "Error (rad)")
 
     raw_input("Press enter....")
 

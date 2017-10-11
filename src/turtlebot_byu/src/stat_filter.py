@@ -26,6 +26,7 @@ def low_variance_sampler(chi, weights):
             # print "length chi: ", len(chi)
             i = i + 1
             c = c + weights[i]
+        # print "i: ", i
         chi_bar.append(chi[i])
         # print "length: ", len(chi_bar)
 

@@ -5,7 +5,7 @@ import dynamics
 import stat_filter
 import pdb
 
-def mcl_turtlebot(chi, v_c, w_c, ranges, bearings, landmark_pts, dt, alpha, sigma_r, sigma_phi):
+def mcl_turtlebot(chi, v_c, w_c, ranges, bearings, landmark_pts, dt, alpha, sigma_r, sigma_phi, sigma):
     num_points = len(chi)
     num_states = len(chi[0])
     chi_bar = np.zeros((num_points,num_states,1))
@@ -26,7 +26,35 @@ def mcl_turtlebot(chi, v_c, w_c, ranges, bearings, landmark_pts, dt, alpha, sigm
 
     weights = weights/np.sum(weights)
 
+    x_particles = np.zeros(len(chi))
+    y_particles = np.zeros(len(chi))
+    theta_particles = np.zeros(len(chi))
+
+    for j in range(0, len(chi)):
+        x_particles[j] = chi_bar[j][0]
+        y_particles[j] = chi_bar[j][1]
+        theta_particles[j] = chi_bar[j][2]
+
+    sigma[0][0] = np.std(x_particles)**2
+    sigma[1][1] = np.std(y_particles)**2
+    sigma[2][2] = np.std(theta_particles)**2
+
     chi = stat_filter.low_variance_sampler(chi_bar, weights)
 
-    return chi
+    unique = len(np.unique(chi, axis=0))
+
+    # if unique/num_points < 0.1:
+    #     Q = sigma/((num_points*unique*1000)**(1.0/num_states))
+    #     print "Q: ", Q
+    #     for i in range(0, num_points):
+    #         for j in range(0, num_states):
+    #             noise =  np.random.multivariate_normal(np.zeros(num_states), Q).T
+    #             # print "noise: ", noise
+    #             chi[i][j] += noise[j]
+
+    print "unique: ", unique
+
+    # print "chi: ", chi
+
+    return chi, sigma
 

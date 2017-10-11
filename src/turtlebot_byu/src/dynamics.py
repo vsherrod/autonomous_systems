@@ -17,5 +17,5 @@ def norm(x):
 def landmark_measurement_model(f, x, landmark_pt, sigma_r, sigma_phi):
     r = norm([landmark_pt[0]-x[0],landmark_pt[1]-x[1]])
     phi = np.arctan2(landmark_pt[1]-x[1],landmark_pt[0]-x[0]) - x[2]
-    q = stat_filter.prob(f[0] - r, sigma_r)*stat_filter.prob(f[1] - phi, sigma_phi)
+    q = stat_filter.prob(f[0] - r, sigma_r*sigma_r)*stat_filter.prob(f[1] - phi, sigma_phi*sigma_phi)
     return q
