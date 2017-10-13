@@ -119,12 +119,12 @@ if __name__=='__main__':
 
     num_particles = 1000
 
-    # lb = [-20.0, -20.0, -np.pi]
-    # ub = [20.0, 20.0, np.pi]
+    lb = [-20.0, -20.0, -np.pi]
+    ub = [20.0, 20.0, np.pi]
     # lb = [-6.0, -4.0, np.pi/4.0]
     # ub = [-4.0, -2.0, 3.0*np.pi/4.0]
-    lb = [-5.1, -4.9, 499.0*np.pi/1000.0]
-    ub = [-3.1, -2.9, 501.0*np.pi/1000.0]
+    # lb = [-5.1, -4.9, 499.0*np.pi/1000.0]
+    # ub = [-3.1, -2.9, 501.0*np.pi/1000.0]
 
     chi = stat_filter.generate_particles_uniform_dist(lb, ub, num_particles)
 
@@ -177,7 +177,7 @@ if __name__=='__main__':
 
         ranges, bearings = simulate_sensor_data(x_next, sigma_r, sigma_phi)
 
-        chi, sigma = mcl.mcl_turtlebot(chi, v_c[i], w_c[i], ranges, bearings, landmark_pts, dt, alpha, sigma_r, sigma_phi, sigma)
+        chi, sigma, mu_next = mcl.mcl_turtlebot(chi, v_c[i], w_c[i], ranges, bearings, landmark_pts, dt, alpha, sigma_r, sigma_phi, sigma)
 
 
         for j in range(0, len(chi)):
@@ -185,10 +185,10 @@ if __name__=='__main__':
             y_particles[j] = chi[j][1]
             theta_particles[j] = chi[j][2]
 
-        mu_next = np.zeros((3,1))
-        mu_next[0] = np.mean(x_particles)
-        mu_next[1] = np.mean(y_particles)
-        mu_next[2] = np.mean(theta_particles)
+        # mu_next = np.zeros((3,1))
+        # mu_next[0] = np.mean(x_particles)
+        # mu_next[1] = np.mean(y_particles)
+        # mu_next[2] = np.mean(theta_particles)
         # sigma[0][0] = np.std(x_particles)**2
         # sigma[1][1] = np.std(y_particles)**2
         # sigma[2][2] = np.std(theta_particles)**2
