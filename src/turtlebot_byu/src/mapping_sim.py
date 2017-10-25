@@ -2,6 +2,7 @@
 import rospy
 from nav_msgs.msg import OccupancyGrid as OG
 from geometry_msgs.msg import TransformStamped
+import os
 import scipy.io as sio
 import tf2_ros
 import tf
@@ -56,7 +57,7 @@ def create_transform(x, timestamp):
 def occ_grid_publisher():
 
     #load data for mapping
-    X, z, thk = load_data('../data/state_meas_data.mat')
+    X, z, thk = load_data(os.path.expanduser('~') + '/git/autonomous_systems/src/turtlebot_byu/data/state_meas_data.mat')
     #iterator for data
     i = 0
 
