@@ -2,6 +2,7 @@
 import rospy
 from nav_msgs.msg import OccupancyGrid as OG
 from geometry_msgs.msg import TransformStamped
+import occ_grid_mapping as ogc
 import os
 import scipy.io as sio
 import tf2_ros
@@ -12,7 +13,7 @@ def load_data(filename):
     data = sio.loadmat(filename)
 
     X = data['X'].T
-    z = data['z']
+    z = data['z'].T
     thk = data['thk']
 
     return X, z, thk
@@ -61,6 +62,10 @@ def occ_grid_publisher():
     #iterator for data
     i = 0
 
+    #true pos and true neg values
+    true_pos = 0.7
+    true_neg = 0.4
+
     #initialize ros node and publisher
     pub = rospy.Publisher('map', OG, queue_size=1)
     rospy.init_node('mapper', anonymous=True)
@@ -77,6 +82,9 @@ def occ_grid_publisher():
         pub.publish(occ_grid)
         transform = create_transform(X[i], occ_grid.header.stamp)
         br.sendTransform(transform)
+
+        ogc.occupancy_grid_mapping(occ_grid, X[i], z[i], true_pos, true_neg)
+
         i += 1
         rate.sleep()
 
