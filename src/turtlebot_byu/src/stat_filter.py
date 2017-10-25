@@ -43,4 +43,11 @@ def generate_particles_uniform_dist(lb, ub, num_particles):
 
     return particles
 
+def log_odds(prob):
+
+    return np.log(prob/(1-prob))
+
+def log_odds_to_prob(l_odds):
+
+    return 1 - 1.0/(1+np.exp(l_odds))
 
