@@ -14,7 +14,7 @@ def load_data(filename):
 
     X = data['X'].T
     z = data['z'].T
-    thk = data['thk']
+    thk = data['thk'].T
 
     return X, z, thk
 
@@ -83,7 +83,7 @@ def occ_grid_publisher():
         transform = create_transform(X[i], occ_grid.header.stamp)
         br.sendTransform(transform)
 
-        ogc.occupancy_grid_mapping(occ_grid, X[i], z[i], true_pos, true_neg)
+        ogc.occupancy_grid_mapping(occ_grid, X[i], z[i], thk, true_pos, true_neg)
 
         i += 1
         rate.sleep()

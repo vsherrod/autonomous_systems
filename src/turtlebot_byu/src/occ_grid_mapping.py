@@ -10,12 +10,12 @@ def to_coords(occ_grid,i):
 
     return [x, y]
 
-def occupancy_grid_mapping(occ_grid, x, z, true_pos, true_neg):
+def occupancy_grid_mapping(occ_grid, x, z, theta_k, true_pos, true_neg):
 
     for i in range(len(occ_grid.data)):
         mx = to_coords(occ_grid,i)
         l_last = st.log_odds(occ_grid.data[i]/100.0)
-        l_next = l_last + sm.inverse_range_sensor_model(mx, x, z, true_pos, true_neg)
+        l_next = l_last + sm.inverse_range_sensor_model(mx, x, z, theta_k, true_pos, true_neg)
         occ_grid.data[i] = st.log_odds_to_prob(l_next)*100.0
 
 
