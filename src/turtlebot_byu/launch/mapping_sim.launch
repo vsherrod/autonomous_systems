@@ -1,0 +1,6 @@
+<launch>
+
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find turtlebot_byu)/rviz/mapping.rviz"/>
+    <node name='mapper' pkg='turtlebot_byu' type='mapping_sim.py'/>
+
+</launch>
