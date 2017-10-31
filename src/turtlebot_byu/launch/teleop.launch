@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<launch>
+
+    <!-- <arg name="world_file" default="$(env TURTLEBOT_GAZEBO_WORLD_FILE)"/> -->
+    <arg name="world_file" default="/usr/share/gazebo-2.2/worlds/willowgarage.world"/>
+
+    <include file='$(find turtlebot_gazebo)/launch/turtlebot_world.launch'>
+        <arg name="world_file" value="$(arg world_file)"/>
+    </include>
+    <!-- <node name="sleeper" pkg="turtlebot_byu" type="sleep.py"/> -->
+    <include file='$(find turtlebot_rviz_launchers)/launch/view_robot.launch'/>
+    <!-- <include file='$(find kobuki_keyop)/launch/keyop.launch'/> -->
+
+    <!-- <node pkg="rviz" type="rviz" name="rviz" args="-d $(find turtlebot_byu)/rviz/mapping.rviz"/> -->
+    <!-- <node name='mapper' pkg='turtlebot_byu' type='mapping_sim.py'/> -->
+
+</launch>
