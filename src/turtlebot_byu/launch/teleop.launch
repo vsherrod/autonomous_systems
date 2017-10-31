@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 
-    <arg name="world_file" default="$(env TURTLEBOT_GAZEBO_WORLD_FILE)"/>
+    <arg name="world_file" default="$(find turtlebot_gazebo)/worlds/playground.world"/>
 
     <include file='$(find turtlebot_gazebo)/launch/turtlebot_world.launch'>
         <arg name="world_file" value="$(arg world_file)"/>
