@@ -66,8 +66,8 @@ def occ_grid_publisher(laser_sub):
     res = 0.1
     width = 100
     height = 100
-    origin_x = 0.0#-width/2.0*res
-    origin_y = 0.0#-height/2.0*res
+    origin_x = -width/2.0*res
+    origin_y = -height/2.0*res
 
 
     #initialize ros node and publisher
