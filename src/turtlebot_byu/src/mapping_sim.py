@@ -79,11 +79,12 @@ def occ_grid_publisher():
 
     while not rospy.is_shutdown():
         occ_grid.header.stamp = rospy.Time.now()
-        pub.publish(occ_grid)
         transform = create_transform(X[i], occ_grid.header.stamp)
         br.sendTransform(transform)
 
-        ogc.occupancy_grid_mapping(occ_grid, X[i], z[i], thk, true_pos, true_neg)
+        occ_grid = ogc.occupancy_grid_mapping(occ_grid, X[i], z[i], thk, true_pos, true_neg)
+
+        pub.publish(occ_grid)
 
         i += 1
         rate.sleep()
