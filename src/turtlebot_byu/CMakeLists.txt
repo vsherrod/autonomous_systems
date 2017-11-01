@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  turtlebot_gazebo
 )
 
 ## System dependencies are found with CMake's conventions
