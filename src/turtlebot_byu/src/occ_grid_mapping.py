@@ -5,8 +5,8 @@ import stat_filter as st
 import sensor_models as sm
 
 def to_coords(occ_grid,i):
-    x = i%occ_grid.info.width + 0.5*occ_grid.info.resolution
-    y = i/occ_grid.info.width + 0.5*occ_grid.info.resolution
+    x = (i%occ_grid.info.width + 0.5)*occ_grid.info.resolution# - occ_grid.info.origin.position.x
+    y = (i/occ_grid.info.width + 0.5)*occ_grid.info.resolution #- occ_grid.info.origin.position.y
 
     return [x, y]
 

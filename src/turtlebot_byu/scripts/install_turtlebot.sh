@@ -10,7 +10,7 @@ sudo apt-get update
 sudo apt-get install -y ros-kinetic-librealsense
 sudo apt-get install -y ros-kinetic-librealsense-camera
 sudo apt-get install -y ros-kinetic-turtlebot
-sudo apt-get install -y ros-kinetic-turtlebot-apps 
+sudo apt-get install -y ros-kinetic-turtlebot-apps
 sudo apt-get install -y ros-kinetic-turtlebot-gazebo 
 sudo apt-get install -y ros-kinetic-turtlebot-rviz-launchers  
 

@@ -11,19 +11,19 @@ class LaserScanSubscriber:
         rospy.Subscriber(topic_name, LaserScan, self.callback)
         self.z_ = []
         self.theta_k_ = []
-        self.timestamp_ = Time()
+        self.timestamp_ = None
         self.z = []
         self.theta_k = []
-        self.timestamp = rospy.Time.now()
+        self.timestamp = None
         self.lock = threading.Lock()
 
-    def callback(self, data):
+    def callback(self, msg):
 
         self.lock.acquire()
         try:
-            self.timestamp_ = data.header.stamp
-            self.theta_k_ = np.linspace(data.angle_min, data.angle_max, len(data.ranges))
-            self.z_ = np.reshape(np.array(data.ranges),(-1,1))
+            self.timestamp_ = msg.header.stamp
+            self.theta_k_ = np.linspace(msg.angle_min, msg.angle_max, len(msg.ranges))
+            self.z_ = np.reshape(np.array(msg.ranges),(-1,1))
         finally:
             self.lock.release()
 

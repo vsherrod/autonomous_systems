@@ -4,7 +4,7 @@ import numpy as np
 import stat_filter as st
 import pdb
 
-def inverse_range_sensor_model(mx, x, z, theta_k, true_pos, true_neg, alpha = 1.0, beta = 5.0*np.pi/180.0, z_max = 150):
+def inverse_range_sensor_model(mx, x, z, theta_k, true_pos, true_neg, alpha = 1.0, beta = 5.0*np.pi/180.0, z_max = 10):
 
     r = math.sqrt((mx[0] - x[0])**2 + (mx[1] - x[1])**2)
     phi = np.arctan2(mx[1]-x[1],mx[0]-x[0]) - x[2]

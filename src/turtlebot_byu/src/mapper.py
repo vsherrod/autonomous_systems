@@ -6,6 +6,7 @@ from geometry_msgs.msg import Pose
 from geometry_msgs.msg import Point
 from geometry_msgs.msg import Quaternion
 from sensor_msgs.msg import LaserScan
+import tf.transformations as tft
 from std_msgs.msg import String
 import laser_scan_subscriber
 import occ_grid_mapping as ogc
@@ -63,10 +64,10 @@ def occ_grid_publisher(laser_sub):
 
     #occupancy grid parameters
     res = 0.1
-    width = 1000
-    height = 1000
-    origin_x = -width/2.0*res
-    origin_y = -height/2.0*res
+    width = 100
+    height = 100
+    origin_x = 0.0#-width/2.0*res
+    origin_y = 0.0#-height/2.0*res
 
 
     #initialize ros node and publisher
@@ -78,17 +79,32 @@ def occ_grid_publisher(laser_sub):
     occ_grid = initialize_occ_grid("odom", res, width, height,Pose(Point(origin_x,origin_y,0.0),Quaternion(0.0,0.0,0.0,1.0)))
 
     #initialize the tf listener
+    listener = tf.TransformListener()
 
     while not rospy.is_shutdown():
 
         timestamp, z, thk = laser_sub.getData()
 
-        #tf listener to get transform from odom to baselink at timestamp
+        if timestamp!=None:
 
-        occ_grid.header.stamp = timestamp
+            #tf listener to get transform from odom to baselink at timestamp
+            (trans, rot) = listener.lookupTransform('odom', 'base_link', timestamp)
 
-        # occ_grid = ogc.occupancy_grid_mapping(occ_grid, X, z, thk, true_pos, true_neg)
-        pub.publish(occ_grid)
+            # convert quaternion to euler angles
+            rot = tft.euler_from_quaternion(rot)
+
+            # get rotation about the z-axis
+            theta = rot[2]
+
+            # assign the states to the correct variable
+            X = trans[:2]
+            X.append(theta)
+
+            occ_grid.header.stamp = timestamp
+
+            occ_grid = ogc.occupancy_grid_mapping(occ_grid, X, z, thk, true_pos, true_neg)
+
+            pub.publish(occ_grid)
 
         rate.sleep()
 
