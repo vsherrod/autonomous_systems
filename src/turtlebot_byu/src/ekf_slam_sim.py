@@ -9,38 +9,49 @@ import ukf
 import dynamics
 import stat_filter
 
-landmark_pts = [[6,4],[-7,8],[6,-4]]
+# landmark_pts = [[6,4],[-7,8],[6,-4]]
+landmark_pts = np.random.uniform(-10,10,(50,2))
 # landmark_pts = [[-7,4],[-7,0],[-7,-4]]
 # landmark_pts = [[6,4]]
 
-def plot_point(x,y):
-    plt.scatter(x,y,plt.rcParams['lines.markersize'] ** 2,'b','x')
+def plot_point(x,y,color='b'):
+    plt.scatter(x,y,plt.rcParams['lines.markersize'] ** 2,color,'x')
 
 def plot_landmarks():
     for i in range(0,len(landmark_pts)):
         plot_point(landmark_pts[i][0],landmark_pts[i][1])
 
-def simulate_sensor_data(x, sigma_r, sigma_phi):
+def plot_estimated_landmarks(mu):
+    for i in xrange(3,len(mu),2):
+        plot_point(mu[i][0],mu[i+1][0],'r')
+
+
+def simulate_sensor_data(x, sigma_r, sigma_phi, fov=20*np.pi/180.0):
     ranges = []
     bearings = []
+    correspondence = []
     for i in range(0,len(landmark_pts)):
-        ranges.append(dynamics.norm([landmark_pts[i][0]-x[0],landmark_pts[i][1]-x[1]]) + stat_filter.noise(sigma_r*sigma_r))
         bearing_map = np.arctan2(landmark_pts[i][1]-x[1],landmark_pts[i][0]-x[0])
-        bearings.append(bearing_map-x[2] + stat_filter.noise(sigma_phi*sigma_phi))
+        bearing = bearing_map-x[2] + stat_filter.noise(sigma_phi*sigma_phi)
+        if bearing <= fov and bearing >= -fov:
+            bearings.append(bearing)
+            ranges.append(dynamics.norm([landmark_pts[i][0]-x[0],landmark_pts[i][1]-x[1]]) + stat_filter.noise(sigma_r*sigma_r))
+            correspondence.append(i)
 
-    return ranges, bearings
+    return ranges, bearings, correspondence
 
 def plot_bearing_measurements(x_last, ranges, bearings):
-    for j in range(0,len(landmark_pts)):
+    for j in range(0,len(bearings)):
         x_land = ranges[j]*np.cos(bearings[j]+x_last[2]) + x_last[0]
         y_land = ranges[j]*np.sin(bearings[j]+x_last[2]) + x_last[1]
         plt.plot([x_last[0], x_land], [x_last[1], y_land], 'b-')
 
-def plot_iteration(x_plot, y_plot, x_last, x_plot_est, y_plot_est, ranges, bearings):
+def plot_iteration(x_plot, y_plot, x_last, x_plot_est, y_plot_est, ranges, bearings, mu):
     plt.clf()
     plt.axis([-10, 10, -10, 10])
 
     plot_landmarks()
+    plot_estimated_landmarks(mu)
     plt.scatter(x_plot, y_plot)
     plt.scatter(x_plot_est, y_plot_est, plt.rcParams['lines.markersize'] ** 2,'k','x')
 
@@ -93,7 +104,7 @@ if __name__=='__main__':
     v = []
     w = []
 
-    sigma = np.eye(3)
+    sigma = np.zeros((3,3))
 
     sigma_x = [2.0]
     sigma_y = [2.0]
@@ -146,9 +157,9 @@ if __name__=='__main__':
         y_plot.append(x[i+1][1])
         theta_plot.append(x[i+1][2])
 
-        ranges, bearings = simulate_sensor_data(x_next, sigma_r, sigma_phi)
+        ranges, bearings, correspondence = simulate_sensor_data(x_next, sigma_r, sigma_phi)
 
-        mu_next, sigma, K_out =  ekf.ekf_turtlebot(mu[i], sigma, v_c[i], w_c[i], ranges, bearings, landmark_pts, dt, Q, alpha)
+        mu_next, sigma = ekf.ekf_slam_turtlebot(mu[i], sigma, v_c[i], w_c[i], ranges, bearings, correspondence, dt, Q, alpha)
         # landmark_idx = i%len(landmark_pts)
         # mu_next, sigma, K_out =  ukf.ukf_turtlebot(mu[i], sigma, v_c[i], w_c[i], ranges[landmark_idx], bearings[landmark_idx], landmark_pts[landmark_idx], dt, Q, alpha)
 
@@ -172,7 +183,8 @@ if __name__=='__main__':
         y_err.append(mu[i+1][1][0] - x[i+1][1])
         theta_err.append(mu[i+1][2][0] - x[i+1][2])
 
-        plot_iteration(x_plot, y_plot, x[i+1], x_plot_est, y_plot_est, ranges, bearings)
+        plot_iteration(x_plot, y_plot,mu[i+1], x_plot_est, y_plot_est, ranges, bearings, mu_next)
+
 
 
     fig2 = plt.figure()
@@ -197,16 +209,9 @@ if __name__=='__main__':
     plot_data(ax6, [t, t, t], [theta_err, sigma_theta, -1*np.array(sigma_theta)], ['Estimate Error in Heading', '95% Certainty', '95% Certainty'], "Heading Error vs Time", "Time (s)", "Error (rad)")
 
     fig5 = plt.figure()
-    ax7 = fig5.add_subplot(311)
-    plot_data(ax7, [t_plot[0]], [K_plot[0]], ['Norm of Kalman Gains Landmark 1'], "Norm of Landmark 1 Kalman Gains vs Time", "Time (s)", "Gain")
+    plt.imshow(sigma)
+    plt.show()
 
-    if len(landmark_pts)>1:
-        ax8 = fig5.add_subplot(312)
-        plot_data(ax8, [t_plot[1]], [K_plot[1]], ['Norm of Kalman Gains Landmark 2'], "Norm of Landmark 2 Kalman Gains vs Time", "Time (s)", "Gain")
-
-    if len(landmark_pts)>2:
-        ax9 = fig5.add_subplot(313)
-        plot_data(ax9, [t_plot[2]], [K_plot[2]], ['Norm of Kalman Gains Landmark 3'], "Norm of Landmark 3 Kalman Gains vs Time", "Time (s)", "Gain")
 
     raw_input("Press enter....")
 
