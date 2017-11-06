@@ -21,12 +21,15 @@ def plot_landmarks():
     for i in range(0,len(landmark_pts)):
         plot_point(landmark_pts[i][0],landmark_pts[i][1])
 
-def plot_estimated_landmarks(mu):
+def plot_estimated_landmarks(mu, sigma):
     for i in xrange(3,len(mu),2):
         plot_point(mu[i][0],mu[i+1][0],'r')
+        sigma_est = sigma.take([i,i+1],axis=0)
+        sigma_est = sigma_est.take([i,i+1],axis=1)
+        stat_filter.plot_cov_ellipse(sigma_est,[mu[i][0],mu[i+1][0]],2,None, facecolor='none')
 
 
-def simulate_sensor_data(x, sigma_r, sigma_phi, fov=20*np.pi/180.0):
+def simulate_sensor_data(x, sigma_r, sigma_phi, fov=90.0*np.pi/180.0):
     ranges = []
     bearings = []
     correspondence = []
@@ -46,12 +49,12 @@ def plot_bearing_measurements(x_last, ranges, bearings):
         y_land = ranges[j]*np.sin(bearings[j]+x_last[2]) + x_last[1]
         plt.plot([x_last[0], x_land], [x_last[1], y_land], 'b-')
 
-def plot_iteration(x_plot, y_plot, x_last, x_plot_est, y_plot_est, ranges, bearings, mu):
+def plot_iteration(x_plot, y_plot, x_last, x_plot_est, y_plot_est, ranges, bearings, mu, sigma):
     plt.clf()
     plt.axis([-10, 10, -10, 10])
 
     plot_landmarks()
-    plot_estimated_landmarks(mu)
+    plot_estimated_landmarks(mu, sigma)
     plt.scatter(x_plot, y_plot)
     plt.scatter(x_plot_est, y_plot_est, plt.rcParams['lines.markersize'] ** 2,'k','x')
 
@@ -183,7 +186,7 @@ if __name__=='__main__':
         y_err.append(mu[i+1][1][0] - x[i+1][1])
         theta_err.append(mu[i+1][2][0] - x[i+1][2])
 
-        plot_iteration(x_plot, y_plot,mu[i+1], x_plot_est, y_plot_est, ranges, bearings, mu_next)
+        plot_iteration(x_plot, y_plot,mu[i+1], x_plot_est, y_plot_est, ranges, bearings, mu_next, sigma)
 
 
 
