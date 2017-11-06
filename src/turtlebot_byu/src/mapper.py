@@ -9,6 +9,7 @@ from sensor_msgs.msg import LaserScan
 import tf.transformations as tft
 from std_msgs.msg import String
 import laser_scan_subscriber
+import numpy as np
 import occ_grid_mapping as ogc
 import os
 import scipy.io as sio
@@ -62,6 +63,11 @@ def occ_grid_publisher(laser_sub):
     true_pos = 0.7
     true_neg = 0.4
 
+    #sensor model parameters
+    alpha = 0.2
+    beta = 0.1*np.pi/180.0
+    z_max = 10
+
     #occupancy grid parameters
     res = 0.1
     width = 100
@@ -103,13 +109,13 @@ def occ_grid_publisher(laser_sub):
             occ_grid.header.stamp = timestamp
 
             trans = [trans[0],trans[1],trans[2]]
-            
+
             (trans2, rot2) = listener.lookupTransform('base_link', 'odom', timestamp)
 
             rot2 = tft.euler_from_quaternion(rot2)
 
             # pass in rot so that the points can be expressed in the bot frame
-            occ_grid = ogc.occupancy_grid_mapping(occ_grid, X, z, thk, true_pos, true_neg, rot2, trans2)
+            occ_grid = ogc.occupancy_grid_mapping(occ_grid, X, z, thk, true_pos, true_neg, rot2, trans2, alpha, beta, z_max)
 
             pub.publish(occ_grid)
 
