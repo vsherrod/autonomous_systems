@@ -102,7 +102,14 @@ def occ_grid_publisher(laser_sub):
 
             occ_grid.header.stamp = timestamp
 
-            occ_grid = ogc.occupancy_grid_mapping(occ_grid, X, z, thk, true_pos, true_neg)
+            trans = [trans[0],trans[1],trans[2]]
+            
+            (trans2, rot2) = listener.lookupTransform('base_link', 'odom', timestamp)
+
+            rot2 = tft.euler_from_quaternion(rot2)
+
+            # pass in rot so that the points can be expressed in the bot frame
+            occ_grid = ogc.occupancy_grid_mapping(occ_grid, X, z, thk, true_pos, true_neg, rot2, trans2)
 
             pub.publish(occ_grid)
 
