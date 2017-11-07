@@ -1,0 +1,3 @@
+[submodule "src/kobuki"]
+	path = src/kobuki
+	url = https://github.com/yujinrobot/kobuki.git
