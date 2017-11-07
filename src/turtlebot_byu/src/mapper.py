@@ -28,7 +28,7 @@ def load_data(filename):
 
 def initialize_occ_grid(frame_id = "odom", res = 1.0, width = 100, height = 100, origin = Pose(Point(0.0,0.0,0.0),Quaternion(0.0,0.0,0.0,1.0))):
     occ_grid = OG()
-    occ_grid.header.frame_id = "odom"
+    occ_grid.header.frame_id = "world"
     occ_grid.info.resolution = res
     occ_grid.info.width = width
     occ_grid.info.height = height
@@ -66,7 +66,7 @@ def occ_grid_publisher(laser_sub):
     #sensor model parameters
     alpha = 0.2
     beta = 0.1*np.pi/180.0
-    z_max = 10
+    z_max = 4.5
 
     #occupancy grid parameters
     res = 0.1
@@ -94,7 +94,8 @@ def occ_grid_publisher(laser_sub):
         if timestamp!=None:
 
             #tf listener to get transform from odom to baselink at timestamp
-            (trans, rot) = listener.lookupTransform('odom', 'base_link', timestamp)
+            listener.waitForTransform('world', 'base_link_truth', timestamp, rospy.Duration(0.02))
+            (trans, rot) = listener.lookupTransform('world', 'base_link_truth', timestamp)
 
             # convert quaternion to euler angles
             rot = tft.euler_from_quaternion(rot)
@@ -110,7 +111,7 @@ def occ_grid_publisher(laser_sub):
 
             trans = [trans[0],trans[1],trans[2]]
 
-            (trans2, rot2) = listener.lookupTransform('base_link', 'odom', timestamp)
+            (trans2, rot2) = listener.lookupTransform('base_link_truth', 'world', timestamp)
 
             rot2 = tft.euler_from_quaternion(rot2)
 
