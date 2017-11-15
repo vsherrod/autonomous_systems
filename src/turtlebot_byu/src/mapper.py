@@ -83,6 +83,8 @@ def occ_grid_publisher(laser_sub):
 
     while not rospy.is_shutdown():
 
+        
+        # pass in the fraction of laser data you want to use
         timestamp, z, thk = laser_sub.getData()
 
         if timestamp!=None:
@@ -119,7 +121,7 @@ if __name__ == '__main__':
 
     rospy.init_node('mapper', anonymous=True)
 
-    laser_sub = laser_scan_subscriber.LaserScanSubscriber("/scan")
+    laser_sub = laser_scan_subscriber.LaserScanSubscriber("/scan",40)
 
 
     try:
