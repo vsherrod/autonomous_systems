@@ -93,7 +93,7 @@ def find_highest_weighted_particle(particles):
 if __name__=='__main__':
 
     x0 = np.array([[-5.0],[-3.0],[np.pi/2.0]])
-    num_particles = 100
+    num_particles = 10
 
     r = 1
 
@@ -170,6 +170,7 @@ if __name__=='__main__':
 
     for i in range(0, len(v_c)-1):
         x_next = dynamics.propogate_next_state(x[i], v[i], w[i], dt)
+        x_next[2] = dynamics.wrap_angle(x_next[2])
         x.append(x_next)
         x_plot.append(x[i+1][0])
         y_plot.append(x[i+1][1])
@@ -216,25 +217,22 @@ if __name__=='__main__':
     plot_data(ax1, [t, t], [x_plot, x_plot_est], ['Truth', 'Estimate'], "X Position vs Time", "Time (s)", "X Position (m)")
 
     ax2 = fig2.add_subplot(212)
-    plot_data(ax2, [t, t, t], [x_err, sigma_x, -1*np.array(sigma_x)], ['Estimate Error in X', '95% Certainty', '95% Certainty'], "X Position Error vs Time", "Time (s)", "Error (m)")
+    plot_data(ax2, [t], [x_err], ['Estimate Error in X', '95% Certainty', '95% Certainty'], "X Position Error vs Time", "Time (s)", "Error (m)")
 
     fig3 = plt.figure()
     ax3 = fig3.add_subplot(211)
     plot_data(ax3, [t, t], [y_plot, y_plot_est], ['Truth', 'Estimate'], "Y Position vs Time", "Time (s)", "Y Position (m)")
 
     ax4 = fig3.add_subplot(212)
-    plot_data(ax4, [t, t, t], [y_err, sigma_y, -1*np.array(sigma_y)], ['Estimate Error in Y', '95% Certainty', '95% Certainty'], "Y Position Error vs Time", "Time (s)", "Error (m)")
+    plot_data(ax4, [t], [y_err], ['Estimate Error in Y', '95% Certainty', '95% Certainty'], "Y Position Error vs Time", "Time (s)", "Error (m)")
 
     fig4 = plt.figure()
     ax5 = fig4.add_subplot(211)
     plot_data(ax5, [t, t], [theta_plot, theta_plot_est], ['Truth', 'Estimate'], "Heading vs Time", "Time (s)", "Heading (rad)")
 
     ax6 = fig4.add_subplot(212)
-    plot_data(ax6, [t, t, t], [theta_err, sigma_theta, -1*np.array(sigma_theta)], ['Estimate Error in Heading', '95% Certainty', '95% Certainty'], "Heading Error vs Time", "Time (s)", "Error (rad)")
+    plot_data(ax6, [t], [theta_err], ['Estimate Error in Heading', '95% Certainty', '95% Certainty'], "Heading Error vs Time", "Time (s)", "Error (rad)")
 
-    fig5 = plt.figure()
-    plt.imshow(sigma)
-    plt.show()
 
 
     raw_input("Press enter....")
