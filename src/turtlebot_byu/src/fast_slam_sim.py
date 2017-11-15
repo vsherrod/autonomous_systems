@@ -90,6 +90,23 @@ def find_highest_weighted_particle(particles):
 
     return particles[idx]
 
+def find_mean_of_particles(particles):
+    x = []
+    y = []
+    theta = []
+    for i in range(len(particles)):
+        x.append(particles[i].x)
+        y.append(particles[i].y)
+        theta.append(particles[i].theta)
+
+    x_mean = sum(x)/len(x)
+    y_mean = sum(y)/len(y)
+    theta_mean = sum(theta)/len(theta)
+
+    mean = np.array([[x_mean],[y_mean],[theta_mean]])
+
+    return mean
+
 if __name__=='__main__':
 
     x0 = np.array([[-5.0],[-3.0],[np.pi/2.0]])
@@ -185,7 +202,8 @@ if __name__=='__main__':
         # mu_next, sigma, K_out =  ukf.ukf_turtlebot(mu[i], sigma, v_c[i], w_c[i], ranges[landmark_idx], bearings[landmark_idx], landmark_pts[landmark_idx], dt, Q, alpha)
         particle = find_highest_weighted_particle(particles)
 
-        x_ext_next = np.array([[particle.x],[particle.y],[particle.theta]])
+        x_ext_next = find_mean_of_particles(particles)
+        # x_ext_next = np.array([[particle.x],[particle.y],[particle.theta]])
         mu.append(x_ext_next)
 
         # K_plot[landmark_idx].append(K_out[0][0])
@@ -204,7 +222,7 @@ if __name__=='__main__':
 
         x_err.append(mu[i+1][0][0] - x[i+1][0])
         y_err.append(mu[i+1][1][0] - x[i+1][1])
-        theta_err.append(mu[i+1][2][0] - x[i+1][2])
+        theta_err.append(dynamics.wrap_angle(mu[i+1][2][0] - x[i+1][2]))
 
         plot_iteration(x_plot, y_plot,mu[i+1], x_plot_est, y_plot_est, ranges, bearings, particle)
 
