@@ -3,6 +3,7 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse
+import copy
 
 def noise(covariance):
     return math.sqrt(covariance)*np.random.randn()
@@ -19,7 +20,7 @@ def low_variance_sampler(chi, weights):
     print "max: ", np.amax(weights)
 
     for m in range(0, M):
-        U = r + (m)*1/M
+        U = r + (m)*1.0/M
         while U > c:
             # print i
             # print "m: ", m
@@ -32,6 +33,29 @@ def low_variance_sampler(chi, weights):
         # print "length: ", len(chi_bar)
 
     return chi_bar
+
+def low_variance_sampler(particles):
+    new_particles = []
+    M = len(particles)
+    r = np.random.rand()*(1.0/M)
+    c = particles[0].weight
+    i = 0
+
+    for m in range(0, M):
+        U = r + (m)*1.0/M
+        while U > c:
+            # print i
+            # print "m: ", m
+            # print "U: ", U
+            # print "length weights: ", len(weights)
+            # print "length chi: ", len(chi)
+            i = i + 1
+            c = c + particles[i].weight
+        print "copy ", i
+        new_particles.append(copy.deepcopy(particles[i]))
+        # print "length: ", len(chi_bar)
+
+    return new_particles
 
 def uniform_rand(lb,ub):
     return np.random.rand()*(ub - lb) + lb
