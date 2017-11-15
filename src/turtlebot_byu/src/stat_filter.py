@@ -20,7 +20,7 @@ def low_variance_sampler(chi, weights):
     print "max: ", np.amax(weights)
 
     for m in range(0, M):
-        U = r + (m)*1/M
+        U = r + (m)*1.0/M
         while U > c:
             # print i
             # print "m: ", m
@@ -42,7 +42,7 @@ def low_variance_sampler(particles):
     i = 0
 
     for m in range(0, M):
-        U = r + (m)*1/M
+        U = r + (m)*1.0/M
         while U > c:
             # print i
             # print "m: ", m
@@ -51,6 +51,7 @@ def low_variance_sampler(particles):
             # print "length chi: ", len(chi)
             i = i + 1
             c = c + particles[i].weight
+        print "copy ", i
         new_particles.append(copy.deepcopy(particles[i]))
         # print "length: ", len(chi_bar)
 

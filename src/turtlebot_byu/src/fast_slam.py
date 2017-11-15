@@ -53,13 +53,13 @@ def fast_slam_known_correspondence_turtlebot(v_c, w_c, ranges, bearing, correspo
         particles[i].y = copy.deepcopy(x_next[1][0])
         particles[i].theta = copy.deepcopy(dynamics.wrap_angle(x_next[2][0]))
 
-        print i
-        print "x_p0: ", particles[0].x
-        print "y_p0: ", particles[0].y
-        print "theta_p0: ", particles[0].theta
-        print "x: ", particles[i].x
-        print "y: ", particles[i].y
-        print "theta: ", particles[i].theta
+        # print i
+        # print "x_p0: ", particles[0].x
+        # print "y_p0: ", particles[0].y
+        # print "theta_p0: ", particles[0].theta
+        # print "x: ", particles[i].x
+        # print "y: ", particles[i].y
+        # print "theta: ", particles[i].theta
 
         # pdb.set_trace()
 
@@ -86,8 +86,8 @@ def fast_slam_known_correspondence_turtlebot(v_c, w_c, ranges, bearing, correspo
 
             z_hat, H = calc_z_hat_and_H(ldm , particles[i])
 
-            Q = np.dot(np.dot(H,ldm.sigma),H.T) + Q
-            K = np.dot(np.dot(ldm.sigma, H.T), np.linalg.inv(Q))
+            S = np.dot(np.dot(H,ldm.sigma),H.T) + Q
+            K = np.dot(np.dot(ldm.sigma, H.T), np.linalg.inv(S))
 
             z = np.array([[ranges], [bearing]])
 
@@ -104,8 +104,9 @@ def fast_slam_known_correspondence_turtlebot(v_c, w_c, ranges, bearing, correspo
 
             particles[i].landmarks[idx] = ldm
 
+            particles[i].weight = np.linalg.det(2*np.pi*S)*np.exp(-.5*np.dot(np.dot(res.T,np.linalg.inv(S)),res))[0][0]
 
-            particles[i].weight = np.linalg.det(2*np.pi*Q)*np.exp(-.5*np.dot(np.dot(res.T,np.linalg.inv(Q)),res))[0][0]
+            # print "Weights: ", particles[i].weight, " For: ", i
 
     particles = normalize_weights(particles)
     new_particles = stat_filter.low_variance_sampler(particles)
