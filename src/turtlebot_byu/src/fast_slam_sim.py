@@ -10,7 +10,7 @@ import fast_slam_particle
 import pdb
 
 # landmark_pts = [[6,4],[-7,8],[6,-4]]
-landmark_pts = np.random.uniform(-10,10,(10,2))
+landmark_pts = np.random.uniform(-10,10,(100,2))
 # landmark_pts = [[-7,4],[-7,0],[-7,-4]]
 # landmark_pts = [[6,4]]
 
@@ -110,7 +110,7 @@ def find_mean_of_particles(particles):
 if __name__=='__main__':
 
     x0 = np.array([[-5.0],[-3.0],[np.pi/2.0]])
-    num_particles = 10
+    num_particles = 100
 
     r = 1
 
@@ -195,9 +195,10 @@ if __name__=='__main__':
 
         ranges, bearings, correspondence = simulate_sensor_data(x_next, sigma_r, sigma_phi)
 
-        ldm_idx = i%len(ranges)
+        # ldm_idx = i%len(ranges)
 
-        particles = fast_slam.fast_slam_known_correspondence_turtlebot(v_c[i], w_c[i], ranges[ldm_idx], bearings[ldm_idx], correspondence[ldm_idx], particles, dt, Q, alpha)
+        # particles = fast_slam.fast_slam_known_correspondence_turtlebot(v_c[i], w_c[i], ranges[ldm_idx], bearings[ldm_idx], correspondence[ldm_idx], particles, dt, Q, alpha)
+        particles = fast_slam.fast_slam_known_correspondence_turtlebot(v_c[i], w_c[i], ranges, bearings, correspondence, particles, dt, Q, alpha)
         # landmark_idx = i%len(landmark_pts)
         # mu_next, sigma, K_out =  ukf.ukf_turtlebot(mu[i], sigma, v_c[i], w_c[i], ranges[landmark_idx], bearings[landmark_idx], landmark_pts[landmark_idx], dt, Q, alpha)
         particle = find_highest_weighted_particle(particles)

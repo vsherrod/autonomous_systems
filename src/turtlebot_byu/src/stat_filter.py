@@ -51,7 +51,7 @@ def low_variance_sampler(particles):
             # print "length chi: ", len(chi)
             i = i + 1
             c = c + particles[i].weight
-        print "copy ", i
+        # print "copy ", i
         new_particles.append(copy.deepcopy(particles[i]))
         # print "length: ", len(chi_bar)
 

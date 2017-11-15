@@ -7,3 +7,4 @@ class Landmark:
         self.y = y
         self.sigma = covariance*np.eye(2)
         self.correspondence = correspondence
+        self.weight = 0.0

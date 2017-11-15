@@ -39,7 +39,14 @@ def normalize_weights(particles):
 
 
 
-def fast_slam_known_correspondence_turtlebot(v_c, w_c, ranges, bearing, correspondence, particles, dt, Q, alpha):
+def fast_slam_known_correspondence_turtlebot(v_c, w_c, ranges, bearings, correspondences, particles, dt, Q, alpha):
+
+    #calculated a fit over experiments with values
+    exponent = -0.0556*len(ranges) + 8.5556
+
+    scale = 10**exponent
+
+    counter = 0
 
     for i in range(len(particles)):
         v_c_cov = alpha[0]*v_c*v_c + alpha[1]*w_c*w_c
@@ -62,51 +69,66 @@ def fast_slam_known_correspondence_turtlebot(v_c, w_c, ranges, bearing, correspo
         # print "theta: ", particles[i].theta
 
         # pdb.set_trace()
+        particles[i].weight = 1.0
 
-        j = correspondence
+        for k in range(len(ranges)):
 
-        if particles[i].seen.count(j) < 1:
-            particles[i].seen.append(j)
+            j = correspondences[k]
 
-            x = particles[i].x + ranges*np.cos(bearing + particles[i].theta)
-            y = particles[i].y + ranges*np.sin(bearing + particles[i].theta)
+            if particles[i].seen.count(j) < 1:
+                particles[i].seen.append(j)
 
-            ldm = landmark.Landmark(j,x,y)
-            particles[i].landmarks.append(ldm)
+                # print "particle len: ", len(particles)
+                # print "range len: ", len(ranges)
+                # counter += 1
+                # print counter
+                x = particles[i].x + ranges[k]*np.cos(bearings[k] + particles[i].theta)
+                y = particles[i].y + ranges[k]*np.sin(bearings[k] + particles[i].theta)
 
-            H = calc_H(ldm, particles[i])[0]
-            H_inv = np.linalg.inv(H)
-            ldm.sigma = np.dot(np.dot(H_inv,Q),H_inv.T)
-            particles[i].weight = 1.0/len(particles)
+                ldm = landmark.Landmark(j,x,y)
+                particles[i].landmarks.append(ldm)
 
-        else:
-            idx = particles[i].seen.index(j)
+                H = calc_H(ldm, particles[i])[0]
+                H_inv = np.linalg.inv(H)
+                ldm.sigma = np.dot(np.dot(H_inv,Q),H_inv.T)
+                # print "sigma: ", ldm.sigma
+                # print "H: ", H
+                ldm.weight = scale*1.0/len(particles)
+                particles[i].weight *= ldm.weight
+                # particles[i].weight = 1.0/len(particles)
 
-            ldm = particles[i].landmarks[idx]
+            else:
+                idx = particles[i].seen.index(j)
 
-            z_hat, H = calc_z_hat_and_H(ldm , particles[i])
+                ldm = particles[i].landmarks[idx]
 
-            S = np.dot(np.dot(H,ldm.sigma),H.T) + Q
-            K = np.dot(np.dot(ldm.sigma, H.T), np.linalg.inv(S))
+                z_hat, H = calc_z_hat_and_H(ldm , particles[i])
 
-            z = np.array([[ranges], [bearing]])
+                S = np.dot(np.dot(H,ldm.sigma),H.T) + Q
+                K = np.dot(np.dot(ldm.sigma, H.T), np.linalg.inv(S))
 
-            res = np.array(z-z_hat)
+                z = np.array([[ranges[k]], [bearings[k]]])
 
-            res[1][0] = dynamics.wrap_angle(res[1][0])
+                res = np.array(z-z_hat)
 
-            mu = np.array([[ldm.x],[ldm.y]]) + np.dot(K, res)
+                res[1][0] = dynamics.wrap_angle(res[1][0])
 
-            ldm.x = mu[0][0]
-            ldm.y = mu[1][0]
+                mu = np.array([[ldm.x],[ldm.y]]) + np.dot(K, res)
 
-            ldm.sigma = np.dot(np.eye(2)-np.dot(K,H),ldm.sigma)
+                ldm.x = mu[0][0]
+                ldm.y = mu[1][0]
 
-            particles[i].landmarks[idx] = ldm
+                ldm.sigma = np.dot(np.eye(2)-np.dot(K,H),ldm.sigma)
 
-            particles[i].weight = np.linalg.det(2*np.pi*S)*np.exp(-.5*np.dot(np.dot(res.T,np.linalg.inv(S)),res))[0][0]
+                particles[i].landmarks[idx] = ldm
 
-            # print "Weights: ", particles[i].weight, " For: ", i
+                # particles[i].weight = np.linalg.det(2*np.pi*S)*np.exp(-.5*np.dot(np.dot(res.T,np.linalg.inv(S)),res))[0][0]
+                ldm.weight = scale*(np.linalg.det(2*np.pi*S)*np.exp(-.5*np.dot(np.dot(res.T,np.linalg.inv(S)),res))[0][0])
+                particles[i].weight *= ldm.weight
+
+                # print "Weights: ", particles[i].weight, " For: ", i
+
+        print "Weights: ", particles[i].weight, " For: ", i
 
     particles = normalize_weights(particles)
     new_particles = stat_filter.low_variance_sampler(particles)
