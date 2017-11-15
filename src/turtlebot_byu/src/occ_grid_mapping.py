@@ -13,7 +13,7 @@ def to_coords(occ_grid,i):
     y = (i/occ_grid.info.width + 0.5)*occ_grid.info.resolution + occ_grid.info.origin.position.y
     return [x, y]
 
-def occupancy_grid_mapping(occ_grid, x, z, theta_k, true_pos, true_neg, rot, trans, alpha = 1.0, beta = 5.0*np.pi/180.0, z_max = 150):
+def occupancy_grid_mapping(occ_grid, x, z, theta_k, true_pos, true_neg, rot = [0.0, 0.0, 0.0], trans = [0.0, 0.0, 0.0], alpha = 1.0, beta = 5.0*np.pi/180.0, z_max = 150):
 
     R_bot_world = tft.euler_matrix(rot[0],rot[1],rot[2])
     R_bot_world[0:3,3] = [trans[0],trans[1],trans[2]]
