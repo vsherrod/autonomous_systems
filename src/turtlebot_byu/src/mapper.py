@@ -57,7 +57,7 @@ def create_transform(x, timestamp):
     return transform
 
 
-def occ_grid_publisher(laser_sub):
+def occ_grid_publisher(laser_sub, laser_res):
 
     #true pos and true neg values
     true_pos = 0.7
@@ -65,8 +65,8 @@ def occ_grid_publisher(laser_sub):
 
     #sensor model parameters
     alpha = 0.2
-    beta = 0.1*np.pi/180.0
-    z_max = 4.5
+    beta = 60.0/(640.0/laser_res)*np.pi/180.0
+    z_max = 10
 
     #occupancy grid parameters
     res = 0.1
@@ -89,12 +89,14 @@ def occ_grid_publisher(laser_sub):
 
     while not rospy.is_shutdown():
 
+        
+        # pass in the fraction of laser data you want to use
         timestamp, z, thk = laser_sub.getData()
 
         if timestamp!=None:
 
             #tf listener to get transform from odom to baselink at timestamp
-            listener.waitForTransform('world', 'base_link_truth', timestamp, rospy.Duration(0.02))
+            listener.waitForTransform('world', 'base_link_truth', timestamp, rospy.Duration(0.05))
             (trans, rot) = listener.lookupTransform('world', 'base_link_truth', timestamp)
 
             # convert quaternion to euler angles
@@ -125,12 +127,12 @@ def occ_grid_publisher(laser_sub):
 if __name__ == '__main__':
 
     rospy.init_node('mapper', anonymous=True)
-
-    laser_sub = laser_scan_subscriber.LaserScanSubscriber("/scan")
+    laser_res = 40
+    laser_sub = laser_scan_subscriber.LaserScanSubscriber("/scan",laser_res)
 
 
     try:
-        occ_grid_publisher(laser_sub)
+        occ_grid_publisher(laser_sub, laser_res)
 
     except rospy.ROSInterruptException:
         pass
