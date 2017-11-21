@@ -19,3 +19,14 @@ class FastSlamParticleFeatures:
 
         self.landmarks = []
         self.seen = []
+
+def normalize_weights(particles):
+    weight_sum = 0.0
+    for i in range(len(particles)):
+        weight_sum += particles[i].weight
+
+    for i in range(len(particles)):
+        particles[i].weight = particles[i].weight/weight_sum
+
+
+    return particles

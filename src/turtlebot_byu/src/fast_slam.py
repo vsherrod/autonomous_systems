@@ -6,6 +6,7 @@ import stat_filter
 import landmark
 import copy
 import pdb
+import fast_slam_particle
 
 def calc_H(landmark, particle):
     delta = np.array([[landmark.x],[landmark.y]]) - np.array([[particle.x],[particle.y]])
@@ -130,7 +131,7 @@ def fast_slam_known_correspondence_turtlebot(v_c, w_c, ranges, bearings, corresp
 
         print "Weights: ", particles[i].weight, " For: ", i
 
-    particles = normalize_weights(particles)
+    particles = fast_slam_particle.normalize_weights(particles)
     new_particles = stat_filter.low_variance_sampler(particles)
 
     return new_particles
