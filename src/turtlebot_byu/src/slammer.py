@@ -77,7 +77,7 @@ def occ_grid_fast_slam(laser_sub, laser_res, velocity_sub):
 
         u = [linear.x, angular.z]
 
-        fast_slam.occupancy_grid_fast_slam(particles, u, z, thk, alpha_vec, dt, true_pos, true_neg, rot2, trans2, alpha, beta, z_max):
+        fast_slam.occupancy_grid_fast_slam(particles, u, z, thk, alpha_vec, dt, true_pos, true_neg, rot2, trans2, alpha, beta, z_max)
 
         # if timestamp!=None:
 
