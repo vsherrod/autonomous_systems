@@ -27,16 +27,19 @@ def to_coords(occ_grid,i):
     y = (i/occ_grid.info.width + 0.5)*occ_grid.info.resolution + occ_grid.info.origin.position.y
     return [x, y]
 
-def occupancy_grid_mapping(occ_grid, x, z, theta_k, true_pos, true_neg, rot = [0.0, 0.0, 0.0], trans = [0.0, 0.0, 0.0], alpha = 1.0, beta = 5.0*np.pi/180.0, z_max = 150):
-
-    R_bot_world = tft.euler_matrix(rot[0],rot[1],rot[2])
-    R_bot_world[0:3,3] = [trans[0],trans[1],trans[2]]
+def occupancy_grid_mapping(occ_grid, x, z, theta_k, true_pos, true_neg, alpha = 1.0, beta = 5.0*np.pi/180.0, z_max = 150):
+    # rotation of bot frame relative to the world frame.
+    R_bot_world = np.array([[np.cos(x[2]),-np.sin(x[2])],[np.sin(x[2]),np.cos(x[2])]])
+    # change it to the the world frame relative to the bot frame and add translation
+    R_T = R_bot_world.T
+    d = np.array([[x[0]],[x[1]]])
+    T_world_bot = np.append(np.append(R_T,np.dot(R_T,d), axis=1),np.array([[0,0,1]]), axis=0)
+    
     for i in range(len(occ_grid.data)):
         mx = to_coords(occ_grid,i)
         temp = copy(mx)
-        temp.append(0)
         temp.append(1)
-        p_trans = np.dot(R_bot_world.tolist(),temp)
+        p_trans = np.dot(T_world_bot.tolist(),temp)
         p_x = p_trans[0]
         p_y = p_trans[1]
 
