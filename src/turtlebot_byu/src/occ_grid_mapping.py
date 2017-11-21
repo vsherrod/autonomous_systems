@@ -10,6 +10,7 @@ import numpy as np
 from geometry_msgs.msg import Point
 from geometry_msgs.msg import Pose
 from geometry_msgs.msg import Quaternion
+import math
 
 def initialize_occ_grid(frame_id = "odom", res = 1.0, width = 100, height = 100, origin = Pose(Point(0.0,0.0,0.0),Quaternion(0.0,0.0,0.0,1.0))):
     occ_grid = OG()
@@ -26,6 +27,12 @@ def to_coords(occ_grid,i):
     x = (i%occ_grid.info.width + 0.5)*occ_grid.info.resolution + occ_grid.info.origin.position.x
     y = (i/occ_grid.info.width + 0.5)*occ_grid.info.resolution + occ_grid.info.origin.position.y
     return [x, y]
+
+def to_index(occ_grid,x,y):
+    delta_x = round((x - occ_grid.info.origin.position.x)/occ_grid.info.resolution -0.5)#*occ_grid.info.resolution
+    delta_y = round((y - occ_grid.info.origin.position.y)/occ_grid.info.resolution -0.5)#*occ_grid.info.resolution
+    i = int(occ_grid.info.width*delta_y + delta_x)
+    return i
 
 def occupancy_grid_mapping(occ_grid, x, z, theta_k, true_pos, true_neg, rot = [0.0, 0.0, 0.0], trans = [0.0, 0.0, 0.0], alpha = 1.0, beta = 5.0*np.pi/180.0, z_max = 150):
 
@@ -47,5 +54,82 @@ def occupancy_grid_mapping(occ_grid, x, z, theta_k, true_pos, true_neg, rot = [0
 
 
     return occ_grid
+
+def is_occupied(occ_grid,idx):
+    if idx > len(occ_grid.data)-1 or idx < 0:
+        return False
+    else:
+        return occ_grid.data[idx] > 50
+
+def find_dist_to_nearest_neighbor(occ_grid, x_start, y_start):
+    nearest_neigbor = find_nearest_neighbor(occ_grid, x_start, y_start)
+
+    dist = math.sqrt((y_start - neartest_neigbor[1])**2 + (x_start - nearest_neigbor[0])**2)
+
+    return dist
+
+
+def find_nearest_neighbor(occ_grid, x_start, y_start):
+    #this finds the nearest neigbor by checking in rings around the starting cell.  It returns the first one it finds in a ring that is occupied, so it is not guaranteed to give the shortest distance by the 2-norm, but rather by the infinity norm
+    start_idx = to_index(occ_grid, x_start, y_start)
+
+    if is_occupied(occ_grid,start_idx):
+        return to_coords(occ_grid, start_idx)
+
+    search_dist = 1
+    search_max = max([occ_grid.info.width, occ_grid.info.height])
+
+    while search_dist < search_max:
+        cur_idx = start_idx - search_dist
+        if is_occupied(occ_grid, cur_idx):
+            return to_coords(occ_grid, cur_idx)
+
+        cur_idx = start_idx + search_dist
+        if is_occupied(occ_grid, cur_idx):
+            return to_coords(occ_grid, cur_idx)
+
+        for i in range(2*search_dist-2):
+            rows_shifted = (-1**i)*(i/2+1)
+            #maybe should keep track of which one is the min distance from here
+            cur_idx = start_idx+rows_shifted*occ_grid.info.width - search_dist
+            if is_occupied(occ_grid, cur_idx):
+                return to_coords(occ_grid, cur_idx)
+
+            cur_idx = start_idx+rows_shifted*occ_grid.info.width + search_dist
+            if is_occupied(occ_grid, cur_idx):
+                return to_coords(occ_grid, cur_idx)
+
+
+        for i in range(-search_dist, search_dist+1):
+            cur_idx = start_idx+search_dist*occ_grid.info.width + i
+            if is_occupied(occ_grid, cur_idx):
+                return to_coords(occ_grid, cur_idx)
+
+            cur_idx = start_idx-search_dist*occ_grid.info.width + i
+            if is_occupied(occ_grid, cur_idx):
+                return to_coords(occ_grid, cur_idx)
+
+        search_dist += 1
+
+
+if __name__ == '__main__':
+    #occupancy grid parameters
+    res = 0.1
+    width = 100
+    height = 100
+    origin_x = -width/2.0*res
+    origin_y = -height/2.0*res
+    occ_grid = initialize_occ_grid("world", res, width, height,Pose(Point(origin_x,origin_y,0.0),Quaternion(0.0,0.0,0.0,1.0)))
+
+    idx = 5
+    # occ_grid.data[idx] = 100
+    # occ_grid.data[7] = 100
+
+
+
+
+    nearest_neigbor = find_nearest_neighbor(occ_grid, -4.0, -4.7)
+    print "Nearest: ", nearest_neigbor
+    print "Actual: ", to_coords(occ_grid, idx)
 
 
