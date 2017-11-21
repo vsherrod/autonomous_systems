@@ -38,10 +38,10 @@ def occ_grid_publisher(laser_sub, laser_res):
     #initialize ros node and publisher
     pub = rospy.Publisher('map', OG, queue_size=1)
 
-    rate = rospy.Rate(5) #hz
+    rate = rospy.Rate(20) #hz
 
     #initialize the occ_grid msg
-    occ_grid = ogc.initialize_occ_grid("odom", res, width, height,Pose(Point(origin_x,origin_y,0.0),Quaternion(0.0,0.0,0.0,1.0)))
+    occ_grid = ogc.initialize_occ_grid("world", res, width, height,Pose(Point(origin_x,origin_y,0.0),Quaternion(0.0,0.0,0.0,1.0)))
 
     #initialize the tf listener
     listener = tf.TransformListener()

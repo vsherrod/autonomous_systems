@@ -13,7 +13,7 @@ from geometry_msgs.msg import Quaternion
 
 def initialize_occ_grid(frame_id = "odom", res = 1.0, width = 100, height = 100, origin = Pose(Point(0.0,0.0,0.0),Quaternion(0.0,0.0,0.0,1.0))):
     occ_grid = OG()
-    occ_grid.header.frame_id = "world"
+    occ_grid.header.frame_id = frame_id
     occ_grid.info.resolution = res
     occ_grid.info.width = width
     occ_grid.info.height = height

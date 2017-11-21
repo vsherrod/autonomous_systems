@@ -20,6 +20,7 @@
         <param name ="stabilized_frame_id" type="string" value="base_link_truth" />
     </node>
     <node pkg="tf2_ros" type="static_transform_publisher" name="odom_to_world_tf" args="0.0 0.0 0.0 0.0 0.0 0.0 1.0 world odom"/>
-    <node name='mapper' pkg='turtlebot_byu' type='mapper.py' output="screen"/>
+    <!-- <node name='mapper' pkg='turtlebot_byu' type='mapper.py' output="screen"/> -->
+    <node name='slammer' pkg='turtlebot_byu' type='slammer.py' output="screen"/>
 
 </launch>
