@@ -7,6 +7,20 @@ import sensor_models as sm
 from pdb import set_trace as brake
 from copy import copy
 import numpy as np
+from geometry_msgs.msg import Point
+from geometry_msgs.msg import Pose
+from geometry_msgs.msg import Quaternion
+
+def initialize_occ_grid(frame_id = "odom", res = 1.0, width = 100, height = 100, origin = Pose(Point(0.0,0.0,0.0),Quaternion(0.0,0.0,0.0,1.0))):
+    occ_grid = OG()
+    occ_grid.header.frame_id = "world"
+    occ_grid.info.resolution = res
+    occ_grid.info.width = width
+    occ_grid.info.height = height
+    occ_grid.info.origin = origin
+    occ_grid.data = occ_grid.info.width*occ_grid.info.height*[50]
+
+    return occ_grid
 
 def to_coords(occ_grid,i):
     x = (i%occ_grid.info.width + 0.5)*occ_grid.info.resolution + occ_grid.info.origin.position.x

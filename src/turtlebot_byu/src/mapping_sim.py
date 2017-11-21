@@ -7,6 +7,7 @@ import os
 import scipy.io as sio
 import tf2_ros
 import tf
+import utils
 
 def load_data(filename):
 
@@ -17,43 +18,6 @@ def load_data(filename):
     thk = data['thk'].T
 
     return X, z, thk
-
-def initialize_occ_grid():
-    occ_grid = OG()
-    occ_grid.header.frame_id = "map"
-    occ_grid.info.resolution = 1.0
-    occ_grid.info.width = 100
-    occ_grid.info.height = 100
-    occ_grid.info.origin.position.x = 0.0
-    occ_grid.info.origin.position.y = 0.0
-    occ_grid.info.origin.position.z = 0.0
-    occ_grid.info.origin.orientation.x = 0.0
-    occ_grid.info.origin.orientation.y = 0.0
-    occ_grid.info.origin.orientation.z = 0.0
-    occ_grid.info.origin.orientation.w = 1.0
-    occ_grid.data = 100*100*[50]
-
-    return occ_grid
-
-def create_transform(x, timestamp):
-    transform = TransformStamped()
-
-    transform.header.stamp = timestamp
-    transform.header.frame_id = "map"
-    transform.child_frame_id = "robot"
-
-    transform.transform.translation.x = x[0]
-    transform.transform.translation.y = x[1]
-    transform.transform.translation.z = 0.0
-
-    quat = tf.transformations.quaternion_from_euler(0.0, 0.0, x[2])
-    transform.transform.rotation.x = quat[0]
-    transform.transform.rotation.y = quat[1]
-    transform.transform.rotation.z = quat[2]
-    transform.transform.rotation.w = quat[3]
-
-    return transform
-
 
 def occ_grid_publisher():
 
@@ -72,14 +36,14 @@ def occ_grid_publisher():
     rate = rospy.Rate(50) #50 hz
 
     #initialize the occ_grid msg
-    occ_grid = initialize_occ_grid()
+    occ_grid = ogc.initialize_occ_grid()
 
     #initialize the tf broadcaster
     br = tf2_ros.TransformBroadcaster()
 
     while not rospy.is_shutdown():
         occ_grid.header.stamp = rospy.Time.now()
-        transform = create_transform(X[i], occ_grid.header.stamp)
+        transform = utils.create_transform(X[i], occ_grid.header.stamp)
         br.sendTransform(transform)
 
         occ_grid = ogc.occupancy_grid_mapping(occ_grid, X[i], z[i], thk, true_pos, true_neg)
