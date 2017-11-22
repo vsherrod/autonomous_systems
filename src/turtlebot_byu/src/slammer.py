@@ -75,7 +75,7 @@ def occ_grid_fast_slam(laser_sub, laser_res, velocity_sub):
 
         # pass in the fraction of laser data you want to use
         timestamp, z, thk = laser_sub.getData()
-        
+
         if dt_init:
             t_final = timestamp-0.2
             dt_init = False
@@ -90,7 +90,7 @@ def occ_grid_fast_slam(laser_sub, laser_res, velocity_sub):
             u = [linear.x, angular.z]
             
             # get the next set of particles from occupancy_grid_fast_slam
-            particles = fast_slam.occupancy_grid_fast_slam(particles, u, z, thk, alpha_vec, dt.to_sec(), true_pos, true_neg, alpha, beta, z_max):
+            particles = fast_slam.occupancy_grid_fast_slam(particles, u, z, thk, alpha_vec, dt.to_sec(), true_pos, true_neg, alpha, beta, z_max)
 
             # find the particle with the max weight and the average of all the particles.
             particle_max_w = highest_weight(particles)
