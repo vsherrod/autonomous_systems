@@ -77,7 +77,7 @@ def occ_grid_publisher(laser_sub, laser_res):
             rot2 = tft.euler_from_quaternion(rot2)
 
             # pass in rot so that the points can be expressed in the bot frame
-            occ_grid = ogc.occupancy_grid_mapping(occ_grid, X, z, thk, true_pos, true_neg, rot2, trans2, alpha, beta, z_max)
+            occ_grid = ogc.occupancy_grid_mapping(occ_grid, X, z, thk, true_pos, true_neg, alpha, beta, z_max)
 
             pub.publish(occ_grid)
 
