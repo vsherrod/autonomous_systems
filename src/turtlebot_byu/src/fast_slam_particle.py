@@ -3,7 +3,7 @@ import occ_grid_mapping as ogc
 import copy
 
 class FastSlamParticle:
-    def __init__(self,occ_grid, x=0.0, y=0.0, theta=0.0, weight=0.0):
+    def __init__(self,occ_grid, x=0.0, y=0.0, theta=0.0, weight=1.0):
 
         self.x = x
         self.y = y
@@ -12,7 +12,7 @@ class FastSlamParticle:
         self.weight = weight
 
 class FastSlamParticleFeatures:
-    def __init__(self,x=0.0, y=0.0, theta=0.0, weight=0.0):
+    def __init__(self,x=0.0, y=0.0, theta=0.0, weight=1.0):
 
         self.x = x
         self.y = y
