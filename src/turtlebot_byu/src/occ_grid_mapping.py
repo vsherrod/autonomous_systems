@@ -66,14 +66,17 @@ def likelihood_field_range_finder_model(zt, xt, th_k, z_max, m):
     xk_sens = -0.102
     yk_sens = 0.00
     zk_sens = 0.272
+    z_rand = 0.0
+    z_hit = 3.0
+    sigma_hit = 0.5
     for k in xrange(len(zt)):
         if zt[k] < z_max: 
-            x_zk =  xt[0] + xk_sens*np.cos(x[2])-yk_sens*np.sin(x[2])+zk_sens*np.cos(x[2]+th_k[k])
-            x_zk =  xt[0] + yk_sens*np.cos(x[2])-xk_sens*np.sin(x[2])+zk_sens*np.cos(x[2]+th_k[k])
+            x_zk =  xt[0] + xk_sens*np.cos(xt[2])-yk_sens*np.sin(xt[2])+zk_sens*np.cos(xt[2]+th_k[k])
+            y_zk =  xt[1] + yk_sens*np.cos(xt[2])+xk_sens*np.sin(xt[2])+zk_sens*np.sin(xt[2]+th_k[k])
             
-        # dist = 'this is the min distance function that vallan is coding up'
+            dist = find_dist_to_nearest_neighbor(m, x_zk, y_zk)
 
-        q = q*(z_hit*stat_filter.prob(dist, sigma_hit)+z_rand/z_max)
+            q = q*(z_hit*st.prob(dist, sigma_hit)+z_rand/z_max)
 
     return q
 
@@ -84,9 +87,9 @@ def is_occupied(occ_grid,idx):
         return occ_grid.data[idx] > 50
 
 def find_dist_to_nearest_neighbor(occ_grid, x_start, y_start):
-    nearest_neigbor = find_nearest_neighbor(occ_grid, x_start, y_start)
+    nearest_neighbor = find_nearest_neighbor(occ_grid, x_start, y_start)
 
-    dist = math.sqrt((y_start - neartest_neigbor[1])**2 + (x_start - nearest_neigbor[0])**2)
+    dist = math.sqrt((y_start - nearest_neighbor[1])**2 + (x_start - nearest_neighbor[0])**2)
 
     return dist
 
@@ -133,6 +136,8 @@ def find_nearest_neighbor(occ_grid, x_start, y_start):
 
         search_dist += 1
 
+    return to_coords(occ_grid, 0)
+
 
 if __name__ == '__main__':
     #occupancy grid parameters
@@ -144,8 +149,8 @@ if __name__ == '__main__':
     occ_grid = initialize_occ_grid("world", res, width, height,Pose(Point(origin_x,origin_y,0.0),Quaternion(0.0,0.0,0.0,1.0)))
 
     idx = 5
-    occ_grid.data[idx] = 100
-    occ_grid.data[7] = 100
+    # occ_grid.data[idx] = 100
+    # occ_grid.data[7] = 100
 
 
 
