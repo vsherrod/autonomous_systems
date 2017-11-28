@@ -86,7 +86,7 @@ def is_occupied(occ_grid,idx):
 def find_dist_to_nearest_neighbor(occ_grid, x_start, y_start):
     nearest_neigbor = find_nearest_neighbor(occ_grid, x_start, y_start)
 
-    dist = math.sqrt((y_start - neartest_neigbor[1])**2 + (x_start - nearest_neigbor[0])**2)
+    dist = math.sqrt((y_start - nearest_neigbor[1])**2 + (x_start - nearest_neigbor[0])**2)
 
     return dist
 
@@ -153,6 +153,7 @@ if __name__ == '__main__':
     nearest_neigbor = find_nearest_neighbor(occ_grid, -4.0, -4.7)
     print "Nearest: ", nearest_neigbor
     print "Actual: ", to_coords(occ_grid, idx)
+    print "Dist: ", find_dist_to_nearest_neighbor(occ_grid, -4.0, -4.7)
 
 
 
