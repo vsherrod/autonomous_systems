@@ -5,12 +5,12 @@ import stat_filter
 from pdb import set_trace as pause
 
 def propogate_next_state(x, v, w, dt):
-    pause()
+    # pause()
     delta = np.zeros((3,1))
     if w<1e-6:
         delta[0]=v*np.cos(x[2])*dt
-        delta[1]=v*np.sin(x[2])
-        delta[2]=x[2]
+        delta[1]=v*np.sin(x[2])*dt
+        delta[2]=0.0
     else:
         delta[0]=-v/w*np.sin(x[2]) + v/w*np.sin(x[2] + w*dt)
         delta[1]=v/w*np.cos(x[2]) - v/w*np.cos(x[2] + w*dt)
