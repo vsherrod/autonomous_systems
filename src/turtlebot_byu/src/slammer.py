@@ -71,6 +71,7 @@ def occ_grid_fast_slam(laser_sub, laser_res, velocity_sub):
     listener = tf.TransformListener()
 
     dt_init = True
+    first_time = True
 
     while not rospy.is_shutdown():
 
@@ -94,7 +95,8 @@ def occ_grid_fast_slam(laser_sub, laser_res, velocity_sub):
             u = [linear.x, angular.z]
             
             # get the next set of particles from occupancy_grid_fast_slam
-            particles = fast_slam.occupancy_grid_fast_slam(particles, u, z, thk, alpha_vec, dt, true_pos, true_neg, alpha, beta, z_max)
+            particles = fast_slam.occupancy_grid_fast_slam(particles, u, z, thk, alpha_vec, dt, true_pos, true_neg, alpha, beta, z_max, first_time)
+            first_time = False
 
             # find the particle with the max weight and the average of all the particles.
             particle_max_w = highest_weight(particles)
@@ -114,7 +116,7 @@ def occ_grid_fast_slam(laser_sub, laser_res, velocity_sub):
             pub.publish(particle_max_w.occ_grid)
             
             # assign the final time 
-            t_final = timestamp
+            t_final = timestamp.to_sec()
 
         rate.sleep()
         

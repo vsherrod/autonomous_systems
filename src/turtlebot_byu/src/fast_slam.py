@@ -10,7 +10,7 @@ from pdb import set_trace as pause
 import occ_grid_mapping as ogc
 import fast_slam_particle
 
-def occupancy_grid_fast_slam(particles, u, z, thk, motion_noise, dt, true_pos, true_neg, alpha, beta, z_max):
+def occupancy_grid_fast_slam(particles, u, z, thk, motion_noise, dt, true_pos, true_neg, alpha, beta, z_max, first_time):
 
     v_c = u[0]
     w_c = u[1]
@@ -26,12 +26,16 @@ def occupancy_grid_fast_slam(particles, u, z, thk, motion_noise, dt, true_pos, t
         particles[i].theta = copy.deepcopy(dynamics.wrap_angle(x_next[2][0]))
 
         #calculate weights from measurement model
-        
+        if first_time:
+            particles[i].weight = 1.0/len(particles)
+        else:
+            particles[i].weight = ogc.likelihood_field_range_finder_model(z, x_next, thk, z_max, particles[i].occ_grid)
 
         #update the map for the particle
         X = [particles[i].x, particles[i].y, particles[i].theta]
         particles[i].occ_grid = ogc.occupancy_grid_mapping(particles[i].occ_grid, X, z, thk, true_pos, true_neg, alpha, beta, z_max)
 
+    print "cow"
     particles = fast_slam_particle.normalize_weights(particles)
     new_particles = stat_filter.low_variance_sampler(particles)
 
