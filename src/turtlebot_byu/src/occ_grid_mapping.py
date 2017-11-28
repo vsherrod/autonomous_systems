@@ -4,7 +4,7 @@ from nav_msgs.msg import OccupancyGrid as OG
 import tf.transformations as tft
 import stat_filter as st
 import sensor_models as sm
-from pdb import set_trace as brake
+from pdb import set_trace as pause
 from copy import copy
 import numpy as np
 from geometry_msgs.msg import Point
@@ -35,6 +35,7 @@ def to_index(occ_grid,x,y):
     return i
 
 def occupancy_grid_mapping(occ_grid, x, z, theta_k, true_pos, true_neg, alpha = 1.0, beta = 5.0*np.pi/180.0, z_max = 150):
+    pause()
     # rotation of bot frame relative to the world frame.
     R_bot_world = np.array([[np.cos(x[2]),-np.sin(x[2])],[np.sin(x[2]),np.cos(x[2])]])
     # change it to the the world frame relative to the bot frame and add translation

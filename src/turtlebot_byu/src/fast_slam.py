@@ -5,11 +5,12 @@ import dynamics
 import stat_filter
 import landmark
 import copy
-import pdb
-import occupancy_grid_mapping as ogc
+from pdb import set_trace as pause
+# import occupancy_grid_mapping as ogc
+import occ_grid_mapping as ogc
 import fast_slam_particle
 
-def occupancy_grid_fast_slam(particles, u, z, thk, motion_noise, dt, true_pos, true_neg, rot2, trans2, alpha, beta, z_max):
+def occupancy_grid_fast_slam(particles, u, z, thk, motion_noise, dt, true_pos, true_neg, alpha, beta, z_max):
 
     v_c = u[0]
     w_c = u[1]
@@ -17,19 +18,19 @@ def occupancy_grid_fast_slam(particles, u, z, thk, motion_noise, dt, true_pos, t
     w_c_cov = motion_noise[2]*v_c*v_c + motion_noise[3]*w_c*w_c
 
     for i in range(len(particles)):
-        #sample the motion model
-        x = [[particles[i].x], [particles[i].y], [particles[i].theta]]
+         #sample the motion model
+        x = np.array([[particles[i].x], [particles[i].y], [particles[i].theta]])
         x_next = dynamics.propogate_next_state(x, v_c + stat_filter.noise(v_c_cov), w_c + stat_filter.noise(w_c_cov), dt)
         particles[i].x = copy.deepcopy(x_next[0][0])
         particles[i].y = copy.deepcopy(x_next[1][0])
         particles[i].theta = copy.deepcopy(dynamics.wrap_angle(x_next[2][0]))
 
         #calculate weights from measurement model
-
+        
 
         #update the map for the particle
         X = [particles[i].x, particles[i].y, particles[i].theta]
-        particles[i].occ_grid = ogc.occupancy_grid_mapping(particles[i].occ_grid, X, z, thk, true_pos, true_neg, rot2, trans2, alpha, beta, z_max)
+        particles[i].occ_grid = ogc.occupancy_grid_mapping(particles[i].occ_grid, X, z, thk, true_pos, true_neg, alpha, beta, z_max)
 
     particles = fast_slam_particle.normalize_weights(particles)
     new_particles = stat_filter.low_variance_sampler(particles)

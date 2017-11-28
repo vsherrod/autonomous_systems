@@ -16,6 +16,7 @@ import laser_scan_subscriber
 import twist_subscriber
 import numpy as np
 import occ_grid_mapping as ogc
+from pdb import set_trace as pause
 import os
 import scipy.io as sio
 import tf2_ros
@@ -75,22 +76,25 @@ def occ_grid_fast_slam(laser_sub, laser_res, velocity_sub):
 
         # pass in the fraction of laser data you want to use
         timestamp, z, thk = laser_sub.getData()
+        while timestamp==None:
+            timestamp, z, thk = laser_sub.getData()
 
         if dt_init:
-            t_final = timestamp-0.2
+
+            t_final = timestamp.to_sec()-0.2
             dt_init = False
        
         if timestamp!=None:
 
-            dt = timestamp - t_final
-
+            dt = timestamp.to_sec() - t_final
+            
             # grab the linear and angular velocity command data
             linear, angular = velocity_sub.getData()
             
             u = [linear.x, angular.z]
             
             # get the next set of particles from occupancy_grid_fast_slam
-            particles = fast_slam.occupancy_grid_fast_slam(particles, u, z, thk, alpha_vec, dt.to_sec(), true_pos, true_neg, alpha, beta, z_max)
+            particles = fast_slam.occupancy_grid_fast_slam(particles, u, z, thk, alpha_vec, dt, true_pos, true_neg, alpha, beta, z_max)
 
             # find the particle with the max weight and the average of all the particles.
             particle_max_w = highest_weight(particles)
