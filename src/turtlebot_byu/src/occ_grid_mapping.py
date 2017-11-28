@@ -35,13 +35,13 @@ def to_index(occ_grid,x,y):
     return i
 
 def occupancy_grid_mapping(occ_grid, x, z, theta_k, true_pos, true_neg, alpha = 1.0, beta = 5.0*np.pi/180.0, z_max = 150):
-    pause()
+    
     # rotation of bot frame relative to the world frame.
     R_bot_world = np.array([[np.cos(x[2]),-np.sin(x[2])],[np.sin(x[2]),np.cos(x[2])]])
     # change it to the the world frame relative to the bot frame and add translation
     R_T = R_bot_world.T
     d = np.array([[x[0]],[x[1]]])
-    T_world_bot = np.append(np.append(R_T,np.dot(R_T,d), axis=1),np.array([[0,0,1]]), axis=0)
+    T_world_bot = np.append(np.append(R_T,-np.dot(R_T,d), axis=1),np.array([[0,0,1]]), axis=0)
 
     for i in range(len(occ_grid.data)):
         mx = to_coords(occ_grid,i)
@@ -86,7 +86,7 @@ def is_occupied(occ_grid,idx):
 def find_dist_to_nearest_neighbor(occ_grid, x_start, y_start):
     nearest_neigbor = find_nearest_neighbor(occ_grid, x_start, y_start)
 
-    dist = math.sqrt((y_start - nearest_neigbor[1])**2 + (x_start - nearest_neigbor[0])**2)
+    dist = math.sqrt((y_start - neartest_neigbor[1])**2 + (x_start - nearest_neigbor[0])**2)
 
     return dist
 
@@ -153,7 +153,6 @@ if __name__ == '__main__':
     nearest_neigbor = find_nearest_neighbor(occ_grid, -4.0, -4.7)
     print "Nearest: ", nearest_neigbor
     print "Actual: ", to_coords(occ_grid, idx)
-    print "Dist: ", find_dist_to_nearest_neighbor(occ_grid, -4.0, -4.7)
 
 
 
