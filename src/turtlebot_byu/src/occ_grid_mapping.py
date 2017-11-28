@@ -58,6 +58,24 @@ def occupancy_grid_mapping(occ_grid, x, z, theta_k, true_pos, true_neg, alpha = 
 
     return occ_grid
 
+
+def likelihood_field_range_finder_model(zt, xt, th_k, z_max, m):
+    q = 1
+    # xk_sens, yk_sens, and zk_sens are the offsets of the laser range finders from the base_link frame
+    xk_sens = -0.102
+    yk_sens = 0.00
+    zk_sens = 0.272
+    for k in xrange(len(zt)):
+        if zt[k] < z_max: 
+            x_zk =  xt[0] + xk_sens*np.cos(x[2])-yk_sens*np.sin(x[2])+zk_sens*np.cos(x[2]+th_k[k])
+            x_zk =  xt[0] + yk_sens*np.cos(x[2])-xk_sens*np.sin(x[2])+zk_sens*np.cos(x[2]+th_k[k])
+            
+        # dist = 'this is the min distance function that vallan is coding up'
+
+        q = q*(z_hit*stat_filter.prob(dist, sigma_hit)+z_rand/z_max)
+
+    return q
+
 def is_occupied(occ_grid,idx):
     if idx > len(occ_grid.data)-1 or idx < 0:
         return False
@@ -135,5 +153,7 @@ if __name__ == '__main__':
     print "Nearest: ", nearest_neigbor
     print "Actual: ", to_coords(occ_grid, idx)
     print "Dist: ", find_dist_to_nearest_neighbor(occ_grid, -4.0, -4.7)
+
+
 
 

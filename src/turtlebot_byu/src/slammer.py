@@ -8,6 +8,8 @@ from geometry_msgs.msg import Pose
 from geometry_msgs.msg import Point
 from geometry_msgs.msg import Quaternion
 from sensor_msgs.msg import LaserScan
+from fast_slam_sim import find_highest_weighted_particle as highest_weight
+from fast_slam_sim import find_mean_of_particles as particle_mean
 import tf.transformations as tft
 from std_msgs.msg import String
 import laser_scan_subscriber
@@ -67,48 +69,51 @@ def occ_grid_fast_slam(laser_sub, laser_res, velocity_sub):
     #initialize the tf listener
     listener = tf.TransformListener()
 
+    dt_init = True
+
     while not rospy.is_shutdown():
 
         # pass in the fraction of laser data you want to use
         timestamp, z, thk = laser_sub.getData()
 
-        # grab the linear and angular velocity command data
-        linear, angular = velocity_sub.getData()
+        if dt_init:
+            t_final = timestamp-0.2
+            dt_init = False
+       
+        if timestamp!=None:
 
-        u = [linear.x, angular.z]
+            dt = timestamp - t_final
 
-        fast_slam.occupancy_grid_fast_slam(particles, u, z, thk, alpha_vec, dt, true_pos, true_neg, rot2, trans2, alpha, beta, z_max)
+            # grab the linear and angular velocity command data
+            linear, angular = velocity_sub.getData()
+            
+            u = [linear.x, angular.z]
+            
+            # get the next set of particles from occupancy_grid_fast_slam
+            particles = fast_slam.occupancy_grid_fast_slam(particles, u, z, thk, alpha_vec, dt.to_sec(), true_pos, true_neg, alpha, beta, z_max)
 
-        # if timestamp!=None:
+            # find the particle with the max weight and the average of all the particles.
+            particle_max_w = highest_weight(particles)
+            particle_ave = particle_mean(particles)
 
-        #     #tf listener to get transform from odom to baselink at timestamp
-        #     listener.waitForTransform('world', 'base_link_truth', timestamp, rospy.Duration(0.05))
-        #     (trans, rot) = listener.lookupTransform('world', 'base_link_truth', timestamp)
+            # broadcast the estimated pose (x, y, theta) using the highest weighted particle
+            pose_broadcaster = tf.TransformBroadcaster()
+            x = particle_max_w.x
+            y = particle_max_w.y
+            th = particle_max_w.theta
+            
+            pose_broadcaster.sendTransform((x,y,0), tf.transformations.quaternion_from_euler(0,0,th), timestamp, 'world', 'robot_estimation')
+            
+            
+            particle_max_w.occ_grid.header.stamp = timestamp
 
-        #     # convert quaternion to euler angles
-        #     rot = tft.euler_from_quaternion(rot)
-
-        #     # get rotation about the z-axis
-        #     theta = rot[2]
-
-        #     # assign the states to the correct variable
-        #     X = trans[:2]
-        #     X.append(theta)
-
-        #     occ_grid.header.stamp = timestamp
-
-        #     trans = [trans[0],trans[1],trans[2]]
-
-        #     (trans2, rot2) = listener.lookupTransform('base_link_truth', 'world', timestamp)
-
-        #     rot2 = tft.euler_from_quaternion(rot2)
-
-        #     # pass in rot so that the points can be expressed in the bot frame
-        #     occ_grid = ogc.occupancy_grid_mapping(occ_grid, X, z, thk, true_pos, true_neg, rot2, trans2, alpha, beta, z_max)
-
-        #     pub.publish(occ_grid)
+            pub.publish(particle_max_w.occ_grid)
+            
+            # assign the final time 
+            t_final = timestamp
 
         rate.sleep()
+        
 
 if __name__ == '__main__':
 
