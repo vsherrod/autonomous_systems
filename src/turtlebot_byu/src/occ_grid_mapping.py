@@ -43,11 +43,11 @@ def occupancy_grid_mapping(occ_grid, x, z, theta_k, true_pos, true_neg, alpha = 
     d = np.array([[x[0]],[x[1]]])
     T_world_bot = np.append(np.append(R_T,-np.dot(R_T,d), axis=1),np.array([[0,0,1]]), axis=0)
 
+
     for i in range(len(occ_grid.data)):
+
         mx = to_coords(occ_grid,i)
-        temp = copy(mx)
-        temp.append(1)
-        p_trans = np.dot(T_world_bot.tolist(),temp)
+        p_trans = np.dot(T_world_bot.tolist(),[mx[0],mx[1],1.0])
         p_x = p_trans[0]
         p_y = p_trans[1]
 
@@ -163,5 +163,7 @@ if __name__ == '__main__':
     print "Actual: ", to_coords(occ_grid, idx)
 
 
+def temp_func(occ_grid,i,T_world_bot):
 
 
+    return p_x,p_y,mx

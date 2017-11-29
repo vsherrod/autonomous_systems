@@ -114,8 +114,7 @@ def occ_grid_fast_slam(laser_sub, laser_res, velocity_sub):
             x = particle_max_w.x
             y = particle_max_w.y
             th = particle_max_w.theta
-            print th
-            
+           
 
             pose_broadcaster.sendTransform((x,y,0), tf.transformations.quaternion_from_euler(0,0,th), timestamp, 'robot_estimation', 'world')
             
