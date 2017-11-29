@@ -51,7 +51,10 @@ def occupancy_grid_mapping(occ_grid, x, z, theta_k, true_pos, true_neg, alpha = 
         p_x = p_trans[0]
         p_y = p_trans[1]
 
-        if (np.linalg.norm(np.array(mx)-np.array([p_x,p_y])) < 10) and (p_x > 0) and (p_y < p_x and p_y > -p_x):
+        distance = p_x*p_x + p_y*p_y
+
+        if ( distance < 25) and (p_x > 0) and (p_y < p_x and p_y > -p_x):
+        # if (p_x > 0) and (p_y < p_x and p_y > -p_x):
             l_last = st.log_odds(occ_grid.data[i]/100.0)
             l_next = l_last + sm.inverse_range_sensor_model(mx, x, z, theta_k, true_pos, true_neg, alpha, beta, z_max)
             occ_grid.data[i] = st.log_odds_to_prob(l_next)*100.0
