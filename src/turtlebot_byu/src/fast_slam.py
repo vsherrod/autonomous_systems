@@ -51,6 +51,8 @@ def occupancy_grid_fast_slam(particles, u, z, thk, motion_noise, dt, true_pos, t
     return new_particles
 
 def update_particle(particle,v_c, w_c, v_c_cov, w_c_cov, z, thk, dt, true_pos, true_neg, alpha, beta, z_max, first_time, num_particles, q, idx):
+    #need to make it random seed again for each seperate process
+    np.random.seed()
     #sample the motion model
     x = np.array([[particle.x], [particle.y], [particle.theta]])
     x_next = dynamics.propogate_next_state(x, v_c + stat_filter.noise(v_c_cov), w_c + stat_filter.noise(w_c_cov), dt)
