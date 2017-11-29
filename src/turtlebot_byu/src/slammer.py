@@ -60,7 +60,7 @@ def occ_grid_fast_slam(laser_sub, laser_res, velocity_sub):
     alpha_vec = [alpha1, alpha2, alpha3, alpha4]
 
     #number of particles
-    num_particles = 10
+    num_particles = 8
 
 
     #initialize ros node and publisher

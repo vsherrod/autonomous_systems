@@ -6,7 +6,7 @@ import stat_filter
 import landmark
 import copy
 from pdb import set_trace as pause
-# import occupancy_grid_mapping as ogc
+from multiprocessing import Process, Queue
 import occ_grid_mapping as ogc
 import fast_slam_particle
 
@@ -19,17 +19,38 @@ def occupancy_grid_fast_slam(particles, u, z, thk, motion_noise, dt, true_pos, t
 
     num_particles = len(particles)
 
-    for i in range(len(particles)):
+    pnum = 4
 
-        particles[i] = update_particle(particles[i],v_c, w_c, v_c_cov, w_c_cov, z, thk, motion_noise, dt, true_pos, true_neg, alpha, beta, z_max, first_time, num_particles)
+    q = Queue()
+    temp_particles = []
+
+    for i in range(int(len(particles)/pnum)):
+
+        p1 = Process(target=update_particle, args=(particles[0+pnum*i],v_c, w_c, v_c_cov, w_c_cov, z, thk, dt, true_pos, true_neg, alpha, beta, z_max, first_time, num_particles, q, 0+pnum*i))
+        p1.start()
+        p2 = Process(target=update_particle, args=(particles[1+pnum*i],v_c, w_c, v_c_cov, w_c_cov, z, thk, dt, true_pos, true_neg, alpha, beta, z_max, first_time, num_particles, q, 1+pnum*i ))
+        p2.start()
+        p3 = Process(target=update_particle, args=(particles[2+pnum*i],v_c, w_c, v_c_cov, w_c_cov, z, thk, dt, true_pos, true_neg, alpha, beta, z_max, first_time, num_particles, q, 2+pnum*i ))
+        p3.start()
+        p4 = Process(target=update_particle, args=(particles[3+pnum*i],v_c, w_c, v_c_cov, w_c_cov, z, thk, dt, true_pos, true_neg, alpha, beta, z_max, first_time, num_particles, q, 3+pnum*i ))
+        p4.start()
+
+        for i in range(pnum):
+            temp_particles.append(q.get(True))
+            print "cow: ", temp_particles[i].x
+
+        p1.join()
+        p2.join()
+        p3.join()
+        p4.join()
 
 
-    particles = fast_slam_particle.normalize_weights(particles)
+    particles = fast_slam_particle.normalize_weights(temp_particles)
     new_particles = stat_filter.low_variance_sampler(particles)
 
     return new_particles
 
-def update_particle(particle,v_c, w_c, v_c_cov, w_c_cov, z, thk, motion_noise, dt, true_pos, true_neg, alpha, beta, z_max, first_time, num_particles):
+def update_particle(particle,v_c, w_c, v_c_cov, w_c_cov, z, thk, dt, true_pos, true_neg, alpha, beta, z_max, first_time, num_particles, q, idx):
     #sample the motion model
     x = np.array([[particle.x], [particle.y], [particle.theta]])
     x_next = dynamics.propogate_next_state(x, v_c + stat_filter.noise(v_c_cov), w_c + stat_filter.noise(w_c_cov), dt)
@@ -47,7 +68,9 @@ def update_particle(particle,v_c, w_c, v_c_cov, w_c_cov, z, thk, motion_noise, d
     X = [particle.x, particle.y, particle.theta]
     particle.occ_grid = ogc.occupancy_grid_mapping(particle.occ_grid, X, z, thk, true_pos, true_neg, alpha, beta, z_max)
 
-    return particle
+    print "result: ", particle.x
+
+    q.put(particle)
 
 def calc_H(landmark, particle):
     delta = np.array([[landmark.x],[landmark.y]]) - np.array([[particle.x],[particle.y]])
