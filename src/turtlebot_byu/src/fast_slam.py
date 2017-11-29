@@ -17,29 +17,37 @@ def occupancy_grid_fast_slam(particles, u, z, thk, motion_noise, dt, true_pos, t
     v_c_cov = motion_noise[0]*v_c*v_c + motion_noise[1]*w_c*w_c
     w_c_cov = motion_noise[2]*v_c*v_c + motion_noise[3]*w_c*w_c
 
+    num_particles = len(particles)
+
     for i in range(len(particles)):
-         #sample the motion model
-        x = np.array([[particles[i].x], [particles[i].y], [particles[i].theta]])
-        x_next = dynamics.propogate_next_state(x, v_c + stat_filter.noise(v_c_cov), w_c + stat_filter.noise(w_c_cov), dt)
-        particles[i].x = copy.deepcopy(x_next[0][0])
-        particles[i].y = copy.deepcopy(x_next[1][0])
-        particles[i].theta = copy.deepcopy(dynamics.wrap_angle(x_next[2][0]))
 
-        #calculate weights from measurement model
-        if first_time:
-            particles[i].weight = 1.0/len(particles)
-        else:
-            particles[i].weight = ogc.likelihood_field_range_finder_model(z, x_next, thk, z_max, particles[i].occ_grid)
-
-        #update the map for the particle
-        X = [particles[i].x, particles[i].y, particles[i].theta]
-        particles[i].occ_grid = ogc.occupancy_grid_mapping(particles[i].occ_grid, X, z, thk, true_pos, true_neg, alpha, beta, z_max)
+        particles[i] = update_particle(particles[i],v_c, w_c, v_c_cov, w_c_cov, z, thk, motion_noise, dt, true_pos, true_neg, alpha, beta, z_max, first_time, num_particles)
 
 
     particles = fast_slam_particle.normalize_weights(particles)
     new_particles = stat_filter.low_variance_sampler(particles)
 
     return new_particles
+
+def update_particle(particle,v_c, w_c, v_c_cov, w_c_cov, z, thk, motion_noise, dt, true_pos, true_neg, alpha, beta, z_max, first_time, num_particles):
+    #sample the motion model
+    x = np.array([[particle.x], [particle.y], [particle.theta]])
+    x_next = dynamics.propogate_next_state(x, v_c + stat_filter.noise(v_c_cov), w_c + stat_filter.noise(w_c_cov), dt)
+    particle.x = copy.deepcopy(x_next[0][0])
+    particle.y = copy.deepcopy(x_next[1][0])
+    particle.theta = copy.deepcopy(dynamics.wrap_angle(x_next[2][0]))
+
+    #calculate weights from measurement model
+    if first_time:
+        particle.weight = 1.0/num_particles
+    else:
+        particle.weight = ogc.likelihood_field_range_finder_model(z, x_next, thk, z_max, particle.occ_grid)
+
+    #update the map for the particle
+    X = [particle.x, particle.y, particle.theta]
+    particle.occ_grid = ogc.occupancy_grid_mapping(particle.occ_grid, X, z, thk, true_pos, true_neg, alpha, beta, z_max)
+
+    return particle
 
 def calc_H(landmark, particle):
     delta = np.array([[landmark.x],[landmark.y]]) - np.array([[particle.x],[particle.y]])
