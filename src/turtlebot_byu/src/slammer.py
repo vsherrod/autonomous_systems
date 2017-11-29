@@ -23,6 +23,13 @@ import tf2_ros
 import tf
 
 
+def publish_tf(particles, broadcaster, timestamp):
+    for i in range(len(particles)):
+        x  = particles[i].x
+        y  = particles[i].y
+        th = particles[i].theta
+        broadcaster.sendTransform((x,y,0), tf.transformations.quaternion_from_euler(0,0,th), timestamp, 'particle'+str(i), 'world')
+
 def occ_grid_fast_slam(laser_sub, laser_res, velocity_sub):
 
     #initial position
@@ -73,6 +80,8 @@ def occ_grid_fast_slam(laser_sub, laser_res, velocity_sub):
     dt_init = True
     first_time = True
 
+    pose_broadcaster = tf.TransformBroadcaster()
+
     while not rospy.is_shutdown():
 
         # pass in the fraction of laser data you want to use
@@ -81,8 +90,7 @@ def occ_grid_fast_slam(laser_sub, laser_res, velocity_sub):
             timestamp, z, thk = laser_sub.getData()
 
         if dt_init:
-
-            t_final = timestamp.to_sec()-0.2
+            t_final = timestamp.to_sec()-0.01
             dt_init = False
        
         if timestamp!=None:
@@ -93,7 +101,7 @@ def occ_grid_fast_slam(laser_sub, laser_res, velocity_sub):
             linear, angular = velocity_sub.getData()
             
             u = [linear.x, angular.z]
-            
+           
             # get the next set of particles from occupancy_grid_fast_slam
             particles = fast_slam.occupancy_grid_fast_slam(particles, u, z, thk, alpha_vec, dt, true_pos, true_neg, alpha, beta, z_max, first_time)
             first_time = False
@@ -103,13 +111,15 @@ def occ_grid_fast_slam(laser_sub, laser_res, velocity_sub):
             particle_ave = particle_mean(particles)
 
             # broadcast the estimated pose (x, y, theta) using the highest weighted particle
-            pose_broadcaster = tf.TransformBroadcaster()
             x = particle_max_w.x
             y = particle_max_w.y
             th = particle_max_w.theta
+            print th
             
-            pose_broadcaster.sendTransform((x,y,0), tf.transformations.quaternion_from_euler(0,0,th), timestamp, 'world', 'robot_estimation')
+
+            pose_broadcaster.sendTransform((x,y,0), tf.transformations.quaternion_from_euler(0,0,th), timestamp, 'robot_estimation', 'world')
             
+            publish_tf(particles, pose_broadcaster, timestamp)
             
             particle_max_w.occ_grid.header.stamp = timestamp
 

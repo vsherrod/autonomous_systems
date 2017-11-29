@@ -35,7 +35,7 @@ def occupancy_grid_fast_slam(particles, u, z, thk, motion_noise, dt, true_pos, t
         X = [particles[i].x, particles[i].y, particles[i].theta]
         particles[i].occ_grid = ogc.occupancy_grid_mapping(particles[i].occ_grid, X, z, thk, true_pos, true_neg, alpha, beta, z_max)
 
-    print "cow"
+
     particles = fast_slam_particle.normalize_weights(particles)
     new_particles = stat_filter.low_variance_sampler(particles)
 

@@ -7,7 +7,7 @@ from pdb import set_trace as pause
 def propogate_next_state(x, v, w, dt):
     # pause()
     delta = np.zeros((3,1))
-    if w<1e-6:
+    if np.abs(w)<1e-6:
         delta[0]=v*np.cos(x[2])*dt
         delta[1]=v*np.sin(x[2])*dt
         delta[2]=0.0

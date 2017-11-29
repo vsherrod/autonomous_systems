@@ -71,8 +71,8 @@ def likelihood_field_range_finder_model(zt, xt, th_k, z_max, m):
     sigma_hit = 0.5
     for k in xrange(len(zt)):
         if zt[k] < z_max: 
-            x_zk =  xt[0] + xk_sens*np.cos(xt[2])-yk_sens*np.sin(xt[2])+zk_sens*np.cos(xt[2]+th_k[k])
-            y_zk =  xt[1] + yk_sens*np.cos(xt[2])+xk_sens*np.sin(xt[2])+zk_sens*np.sin(xt[2]+th_k[k])
+            x_zk =  xt[0] + xk_sens*np.cos(xt[2])-yk_sens*np.sin(xt[2])+zt[k]*np.cos(xt[2]+th_k[k])
+            y_zk =  xt[1] + yk_sens*np.cos(xt[2])+xk_sens*np.sin(xt[2])+zt[k]*np.sin(xt[2]+th_k[k])
             
             dist = find_dist_to_nearest_neighbor(m, x_zk, y_zk)
 
