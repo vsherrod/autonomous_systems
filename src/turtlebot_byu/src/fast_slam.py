@@ -33,9 +33,13 @@ def update_particle(particle,v_c, w_c, v_c_cov, w_c_cov, z, thk, motion_noise, d
     #sample the motion model
     x = np.array([[particle.x], [particle.y], [particle.theta]])
     x_next = dynamics.propogate_next_state(x, v_c + stat_filter.noise(v_c_cov), w_c + stat_filter.noise(w_c_cov), dt)
-    particle.x = copy.deepcopy(x_next[0][0])
-    particle.y = copy.deepcopy(x_next[1][0])
-    particle.theta = copy.deepcopy(dynamics.wrap_angle(x_next[2][0]))
+    # particle.x = copy.deepcopy(x_next[0][0])
+    # particle.y = copy.deepcopy(x_next[1][0])
+    # particle.theta = copy.deepcopy(dynamics.wrap_angle(x_next[2][0]))
+
+    particle.x = x_next[0][0]
+    particle.y = x_next[1][0]
+    particle.theta = dynamics.wrap_angle(x_next[2][0])
 
     #calculate weights from measurement model
     if first_time:

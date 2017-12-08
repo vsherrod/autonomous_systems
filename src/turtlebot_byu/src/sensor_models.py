@@ -2,7 +2,7 @@
 import math
 import numpy as np
 import stat_filter as st
-import dynamics 
+import dynamics
 import pdb
 
 def potato(phi, theta_k):
@@ -36,10 +36,8 @@ def part_1(z, z_max):
 
 def inverse_range_sensor_model(mx, x, z, theta_k, true_pos, true_neg, alpha = 1.0, beta = 5.0*np.pi/180.0, z_max = 150):
 
-    r = math.sqrt((mx[0] - x[0])**2 + (mx[1] - x[1])**2)
+    r = math.sqrt((mx[0] - x[0])*(mx[0] - x[0]) + (mx[1] - x[1])*(mx[1] - x[1]))
     phi = dynamics.wrap_angle(np.arctan2(mx[1]-x[1],mx[0]-x[0]) - x[2])
-
-
 
     # k_val = np.absolute(phi-theta_k)
 
