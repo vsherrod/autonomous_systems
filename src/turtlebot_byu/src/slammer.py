@@ -45,9 +45,9 @@ def occ_grid_fast_slam(laser_sub, laser_res, velocity_sub):
     z_max = 10
 
     #occupancy grid parameters
-    res = 0.1
-    width = 100
-    height = 100
+    res = 0.2
+    width = 50
+    height = 50
     origin_x = -width/2.0*res
     origin_y = -height/2.0*res
 
@@ -60,7 +60,7 @@ def occ_grid_fast_slam(laser_sub, laser_res, velocity_sub):
     alpha_vec = [alpha1, alpha2, alpha3, alpha4]
 
     #number of particles
-    num_particles = 10
+    num_particles = 50
 
 
     #initialize ros node and publisher
@@ -134,7 +134,7 @@ def occ_grid_fast_slam(laser_sub, laser_res, velocity_sub):
 if __name__ == '__main__':
 
     rospy.init_node('slammer', anonymous=True)
-    laser_res = 40
+    laser_res = 120
     laser_sub = laser_scan_subscriber.LaserScanSubscriber("/scan",laser_res)
     velocity_sub = twist_subscriber.TwistSubscriber("/mobile_base/commands/velocity")
 
