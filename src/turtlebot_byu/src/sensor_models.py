@@ -57,7 +57,7 @@ def inverse_range_sensor_model(mx, x, z, theta_k, true_pos, true_neg, alpha = 1.
     z[k][0] = part_1(z[k][0], z_max)
 
 
-    if r > min(z_max, z[k][0] + alpha/2.0) or theta_k[k] > beta/2.0:
+    if r > min(z_max, z[k][0] + alpha/2.0) or k_val[k] > beta/2.0:
         # print "1st"
         return st.log_odds(0.5)
 
