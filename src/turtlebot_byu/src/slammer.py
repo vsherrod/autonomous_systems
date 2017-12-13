@@ -13,7 +13,7 @@ from fast_slam_sim import find_mean_of_particles as particle_mean
 import tf.transformations as tft
 from std_msgs.msg import String
 import laser_scan_subscriber
-import twist_subscriber
+import odom_subscriber
 import numpy as np
 import occ_grid_mapping as ogc
 from pdb import set_trace as pause
@@ -60,7 +60,7 @@ def occ_grid_fast_slam(laser_sub, laser_res, velocity_sub):
     alpha_vec = [alpha1, alpha2, alpha3, alpha4]
 
     #number of particles
-    num_particles = 50
+    num_particles = 5
 
 
     #initialize ros node and publisher
@@ -92,16 +92,16 @@ def occ_grid_fast_slam(laser_sub, laser_res, velocity_sub):
         if dt_init:
             t_final = timestamp.to_sec()-0.01
             dt_init = False
-       
+
         if timestamp!=None:
 
             dt = timestamp.to_sec() - t_final
-            
+
             # grab the linear and angular velocity command data
             linear, angular = velocity_sub.getData()
-            
+
             u = [linear.x, angular.z]
-           
+
             # get the next set of particles from occupancy_grid_fast_slam
             particles = fast_slam.occupancy_grid_fast_slam(particles, u, z, thk, alpha_vec, dt, true_pos, true_neg, alpha, beta, z_max, first_time)
             first_time = False
@@ -114,28 +114,28 @@ def occ_grid_fast_slam(laser_sub, laser_res, velocity_sub):
             x = particle_max_w.x
             y = particle_max_w.y
             th = particle_max_w.theta
-           
+
 
             pose_broadcaster.sendTransform((x,y,0), tf.transformations.quaternion_from_euler(0,0,th), timestamp, 'robot_estimation', 'world')
-            
+
             publish_tf(particles, pose_broadcaster, timestamp)
-            
+
             particle_max_w.occ_grid.header.stamp = timestamp
 
             pub.publish(particle_max_w.occ_grid)
-            
-            # assign the final time 
+
+            # assign the final time
             t_final = timestamp.to_sec()
 
         rate.sleep()
-        
+
 
 if __name__ == '__main__':
 
     rospy.init_node('slammer', anonymous=True)
     laser_res = 120
     laser_sub = laser_scan_subscriber.LaserScanSubscriber("/scan",laser_res)
-    velocity_sub = twist_subscriber.TwistSubscriber("/mobile_base/commands/velocity")
+    velocity_sub = odom_subscriber.OdomSubscriber("/odom")
 
 
     try:
