@@ -54,6 +54,7 @@ def occupancy_grid_mapping(occ_grid, x, z, theta_k, true_pos, true_neg, alpha = 
         distance = p_x*p_x + p_y*p_y
 
         if ( distance < 25) and (p_x > 0) and (p_y < p_x and p_y > -p_x):
+        
         # if (p_x > 0) and (p_y < p_x and p_y > -p_x):
             l_last = st.log_odds(occ_grid.data[i]/100.0)
             l_next = l_last + sm.inverse_range_sensor_model(mx, x, z, theta_k, true_pos, true_neg, alpha, beta, z_max)
@@ -66,11 +67,11 @@ def occupancy_grid_mapping(occ_grid, x, z, theta_k, true_pos, true_neg, alpha = 
 def likelihood_field_range_finder_model(zt, xt, th_k, z_max, m):
     q = 1
     # xk_sens, yk_sens, and zk_sens are the offsets of the laser range finders from the base_link frame
-    xk_sens = -0.102
+    xk_sens = 0.00
     yk_sens = 0.00
-    zk_sens = 0.272
+    zk_sens = 0.476
     z_rand = 0.0
-    z_hit = 3.0
+    z_hit = 10.0
     sigma_hit = 0.5
     for k in xrange(len(zt)):
         if zt[k] < z_max: 
