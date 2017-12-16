@@ -55,25 +55,32 @@ def occ_grid_publisher(laser_sub, laser_res):
         if timestamp!=None:
 
             #tf listener to get transform from odom to baselink at timestamp
-            listener.waitForTransform('world', 'base_link_truth', timestamp, rospy.Duration(0.05))
-            (trans, rot) = listener.lookupTransform('world', 'base_link_truth', timestamp)
+            try:
+                listener.waitForTransform('world', 'base_link_truth', timestamp, rospy.Duration(0.05))
+                (trans, rot) = listener.lookupTransform('world', 'base_link_truth', timestamp)
 
-            # convert quaternion to euler angles
-            rot = tft.euler_from_quaternion(rot)
 
-            # get rotation about the z-axis
-            theta = rot[2]
+                # convert quaternion to euler angles
+                rot = tft.euler_from_quaternion(rot)
 
-            # assign the states to the correct variable
-            X = trans[:2]
-            X.append(theta)
+                # get rotation about the z-axis
+                theta = rot[2]
 
-            occ_grid.header.stamp = timestamp
+                # assign the states to the correct variable
+                X = trans[:2]
+                X.append(theta)
 
-            # pass in rot so that the points can be expressed in the bot frame
-            occ_grid = ogc.occupancy_grid_mapping(occ_grid, X, z, thk, true_pos, true_neg, alpha, beta, z_max)
+                occ_grid.header.stamp = timestamp
 
-            pub.publish(occ_grid)
+                # pass in rot so that the points can be expressed in the bot frame
+                occ_grid = ogc.occupancy_grid_mapping(occ_grid, X, z, thk, true_pos, true_neg, alpha, beta, z_max)
+
+                pub.publish(occ_grid)
+
+            except (tf2_ros.TransformException, tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+                print "No data"
+                continue
+
 
         rate.sleep()
 
