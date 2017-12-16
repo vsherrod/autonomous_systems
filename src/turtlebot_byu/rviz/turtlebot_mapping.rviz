@@ -5,6 +5,7 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
+        - /TF1
         - /TF1/Frames1
         - /TF1/Tree1
       Splitter Ratio: 0.5
@@ -26,7 +27,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: LaserScan
+    SyncSource: ""
 Visualization Manager:
   Class: ""
   Displays:
@@ -97,40 +98,14 @@ Visualization Manager:
           Value: false
         gyro_link:
           Value: false
+        markerset:
+          Value: false
+        motive:
+          Value: false
         mount_asus_xtion_pro_link:
           Value: false
         odom:
-          Value: true
-        particle0:
-          Value: true
-        particle1:
-          Value: true
-        particle10:
-          Value: true
-        particle11:
-          Value: true
-        particle12:
-          Value: true
-        particle13:
-          Value: true
-        particle14:
-          Value: true
-        particle2:
-          Value: true
-        particle3:
-          Value: true
-        particle4:
-          Value: true
-        particle5:
-          Value: true
-        particle6:
-          Value: true
-        particle7:
-          Value: true
-        particle8:
-          Value: true
-        particle9:
-          Value: true
+          Value: false
         plate_bottom_link:
           Value: false
         plate_middle_link:
@@ -169,8 +144,6 @@ Visualization Manager:
           Value: false
         pole_top_3_link:
           Value: false
-        robot_estimation:
-          Value: true
         wheel_left_link:
           Value: false
         wheel_right_link:
@@ -184,8 +157,10 @@ Visualization Manager:
       Show Names: true
       Tree:
         world:
-          base_link_truth:
-            {}
+          motive:
+            markerset:
+              base_link_truth:
+                {}
           odom:
             base_footprint:
               base_link:
@@ -253,38 +228,6 @@ Visualization Manager:
                   {}
                 wheel_right_link:
                   {}
-          particle0:
-            {}
-          particle1:
-            {}
-          particle10:
-            {}
-          particle11:
-            {}
-          particle12:
-            {}
-          particle13:
-            {}
-          particle14:
-            {}
-          particle2:
-            {}
-          particle3:
-            {}
-          particle4:
-            {}
-          particle5:
-            {}
-          particle6:
-            {}
-          particle7:
-            {}
-          particle8:
-            {}
-          particle9:
-            {}
-          robot_estimation:
-            {}
       Update Interval: 0
       Value: true
     - Alpha: 1
@@ -518,10 +461,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.50039798
+      Pitch: 1.24539733
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.15360022
+      Yaw: 3.05859995
     Saved: ~
 Window Geometry:
   Displays:
@@ -541,5 +484,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1855
-  X: 1985
+  X: 65
   Y: 24
