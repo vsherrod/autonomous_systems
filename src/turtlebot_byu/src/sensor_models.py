@@ -3,6 +3,7 @@ import math
 import numpy as np
 import stat_filter as st
 import dynamics
+import time
 import pdb
 
 def potato(phi, theta_k):
@@ -130,8 +131,14 @@ if __name__ == '__main__':
     z_max = 10.0
     beta = 0.04908738521234052
 
+    t1 = time.time()
+
     for i in range(60000):
         result = inverse_range_sensor_model(mx, x, z, theta_k, true_pos, true_neg, alpha, beta, z_max)
+
+    t2 = time.time()
+
+    print "Time: ", (t2 - t1)
 
     print result
 
