@@ -52,7 +52,7 @@ def occ_grid_fast_slam(laser_sub, laser_res, velocity_sub):
     origin_y = -height/2.0*res
 
     #motion model noise parameters
-    alpha1 = 0.1
+    alpha1 = 0.01
     alpha4 = 0.1
     alpha2 = 0.01
     alpha3 = 0.01
@@ -60,7 +60,7 @@ def occ_grid_fast_slam(laser_sub, laser_res, velocity_sub):
     alpha_vec = [alpha1, alpha2, alpha3, alpha4]
 
     #number of particles
-    num_particles = 5
+    num_particles = 15
 
 
     #initialize ros node and publisher
